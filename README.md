@@ -24,7 +24,7 @@ This package provides a *DataTables-like* experience for [Inertia.js](https://in
 ## Compatibility
 
 * [Vue 3](https://v3.vuejs.org/guide/installation.html)
-*[Laravel 10](https://laravel.com/)
+* [Laravel 11](https://laravel.com/)
 * [Inertia.js](https://inertiajs.com/)
 * [Tailwind CSS v3](https://tailwindcss.com/) + [Forms plugin](https://github.com/tailwindlabs/tailwindcss-forms)
 * PHP 8.2+
