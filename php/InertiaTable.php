@@ -7,6 +7,10 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Inertia\Response;
+use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\Filter;
+use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\Filterable;
+use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\ToggleFilter;
+use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\NumberRangeFilter;
 
 class InertiaTable
 {
@@ -147,7 +151,7 @@ class InertiaTable
 
             'filters'           => $this->transformFilters(),
             'hasFilters'        => $this->filters->isNotEmpty(),
-            'hasEnabledFilters' => $this->filters->filter->value->isNotEmpty(),
+            'hasEnabledFilters' => $this->filters->whereNotNull('value')->isNotEmpty(),
 
             'searchInputs'                => $searchInputs              = $this->transformSearchInputs(),
             'searchInputsWithoutGlobal'   => $searchInputsWithoutGlobal = $searchInputs->where('key', '!=', 'global'),
@@ -209,9 +213,16 @@ class InertiaTable
             return $filters;
         }
 
-        return $filters->map(function (Filter $filter) use ($queryFilters) {
+        return $filters->map(function (Filterable $filter) use ($queryFilters) {
             if (array_key_exists($filter->key, $queryFilters)) {
-                $filter->value = $queryFilters[$filter->key];
+                if ($filter instanceof NumberRangeFilter) {
+                    $filter->value = [
+                        $queryFilters[$filter->key][0] ?? $filter->min,
+                        $queryFilters[$filter->key][1] ?? $filter->max,
+                    ];
+                } else {
+                    $filter->value = $queryFilters[$filter->key];
+                }
             }
 
             return $filter;
@@ -319,7 +330,7 @@ class InertiaTable
      */
     public function selectFilter(string $key, array $options, string $label = null, string $defaultValue = null, bool $noFilterOption = true, string $noFilterOptionLabel = null): self
     {
-        $this->filters = $this->filters->reject(function (Filter $filter) use ($key) {
+        $this->filters = $this->filters->reject(function (Filterable $filter) use ($key) {
             return $filter->key === $key;
         })->push(new Filter(
             key: $key,
@@ -329,6 +340,53 @@ class InertiaTable
             noFilterOption: $noFilterOption,
             noFilterOptionLabel: $noFilterOptionLabel ?: '-',
             type: 'select'
+        ))->values();
+
+        return $this;
+    }
+
+    /**
+     * Add a toggle filter to the query builder.
+     *
+     * @param string $key
+     * @param string|null $label
+     * @param bool|null $defaultValue
+     * @return self
+     */
+    public function toggleFilter(string $key, string $label = null, bool $defaultValue = null): self
+    {
+        $this->filters = $this->filters->reject(function (Filterable $filter) use ($key) {
+            return $filter->key === $key;
+        })->push(new ToggleFilter(
+            key: $key,
+            label: $label ?: Str::headline($key),
+            value: $defaultValue,
+        ))->values();
+
+        return $this;
+    }
+
+    /**
+     * Add a number range filter to the query builder.
+     *
+     * @param string $key
+     * @param string|null $label
+     * @param bool|null $defaultValue
+     * @return self
+     */
+    public function numberRangeFilter(string $key, float $max, float $min = 0, string $prefix = '', string $suffix = '', float $step = 1, string $label = null, bool $defaultValue = null): self
+    {
+        $this->filters = $this->filters->reject(function (Filterable $filter) use ($key) {
+            //return $filter->key === $key;
+        })->push(new NumberRangeFilter(
+            key: $key,
+            label: $label ?: Str::headline($key),
+            max: $max,
+            min: $min,
+            prefix: $prefix,
+            suffix: $suffix,
+            step: $step,
+            value: $defaultValue,
         ))->values();
 
         return $this;

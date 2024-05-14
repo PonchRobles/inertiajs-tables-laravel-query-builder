@@ -6,8 +6,7 @@
         type="button"
         :dusk="dusk"
         :disabled="disabled"
-        class="w-full bg-white border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        :class="{'border-green-300': active, 'border-gray-300': !active, 'cursor-not-allowed': disabled }"
+        :class="getTheme('button')"
         aria-haspopup="true"
         @click.prevent="toggle"
       >
@@ -32,7 +31,11 @@ import OnClickOutside from "./OnClickOutside.vue";
 import { createPopper } from "@popperjs/core/lib/popper-lite";
 import preventOverflow from "@popperjs/core/lib/modifiers/preventOverflow";
 import flip from "@popperjs/core/lib/modifiers/flip";
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, inject } from "vue";
+import { get_theme_part } from "../helpers.js";
+import { twMerge } from "tailwind-merge";
+
+const emit = defineEmits(["closed"]);
 
 const props = defineProps({
     placement: {
@@ -58,6 +61,17 @@ const props = defineProps({
         default: false,
         required: false,
     },
+
+    color: {
+        type: String,
+        default: "primary",
+        required: false,
+    },
+    ui: {
+        required: false,
+        type: Object,
+        default: {},
+    },
 });
 
 const opened = ref(false);
@@ -73,6 +87,9 @@ function hide() {
 
 watch(opened, () => {
     popper.value.update();
+    if (!opened.value) {
+        emit("closed");
+    }
 });
 
 const button = ref(null);
@@ -86,4 +103,32 @@ onMounted(() => {
 });
 
 defineExpose({ hide });
+
+// Theme
+const commonClasses = "w-full bg-white border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 border-gray-300";
+const fallbackTheme = {
+    inertia_table: {
+        button_with_dropdown: {
+            button: {
+                base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
+                color: {
+                    primary: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-indigo-500",
+                    dootix: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-cyan-500",
+                },
+            },
+        },
+    },
+};
+const themeVariables = inject("themeVariables");
+const getTheme = (type, name) => {
+    let additionalClasses = "";
+    if (item === "button" && props.disabled) {
+        additionalClasses = "cursor-not-allowed";
+    }
+    return twMerge(
+        additionalClasses,
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.button_with_dropdown, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.button_with_dropdown, props.ui),
+    );
+};
 </script>

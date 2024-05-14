@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <input
-      class="block w-full pl-9 text-sm rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300"
+      :class="getTheme('input')"
       :placeholder="label"
       :value="value"
       type="text"
@@ -27,7 +27,11 @@
 </template>
 
 <script setup>
-defineProps({
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { get_theme_part } from "../helpers.js";
+
+const props = defineProps({
     label: {
         type: String,
         default: "Search...",
@@ -44,6 +48,36 @@ defineProps({
         type: Function,
         required: true,
     },
-});
-</script>
 
+    color: {
+        type: String,
+        default: "primary",
+        required: false,
+    },
+
+    ui: {
+        required: false,
+        type: Object,
+        default: {},
+    },
+});
+
+const fallbackTheme = {
+    inertia_table: {
+        global_search: {
+            base: "block w-full pl-9 text-sm rounded-md shadow-sm",
+            color: {
+                primary: "focus:ring-indigo-500 focus:border-indigo-500 border-gray-300",
+                dootix: "focus:ring-cyan-500 focus:border-blue-500 border-gray-300",
+            },
+        },
+    },
+};
+const themeVariables = inject("themeVariables");
+const getTheme = (item) => {
+    return twMerge(
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.global_search, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.global_search, props.ui),
+    );
+};
+</script>

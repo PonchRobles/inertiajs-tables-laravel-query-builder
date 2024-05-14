@@ -31,14 +31,14 @@
         :name="searchInput.key"
         :value="searchInput.value"
         type="text"
-        class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-indigo-500 focus:border-indigo-500 text-sm border-gray-300"
+        :class="getTheme('input')"
         @input="onChange(searchInput.key, $event.target.value)"
       >
       <div
         class="absolute inset-y-0 right-0 pr-3 flex items-center"
       >
         <button
-          class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          :class="getTheme('input')"
           :dusk="`remove-search-row-${searchInput.key}`"
           @click.prevent="onRemove(searchInput.key)"
         >
@@ -64,8 +64,10 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, nextTick } from "vue";
+import { computed, ref, watch, nextTick, inject } from "vue";
 import find from "lodash-es/find";
+import { twMerge } from "tailwind-merge";
+import { get_theme_part } from "../helpers.js";
 
 const skipUnwrap = { el: ref([]) };
 let el = computed(() => skipUnwrap.el.value);
@@ -90,6 +92,17 @@ const props = defineProps({
         type: Function,
         required: true,
     },
+
+    color: {
+        type: String,
+        default: "primary",
+        required: false,
+    },
+    ui: {
+        required: false,
+        type: Object,
+        default: {},
+    },
 });
 
 function isForcedVisible(key) {
@@ -105,7 +118,7 @@ watch(props.forcedVisibleSearchInputs, (inputs) => {
 
     nextTick().then(() => {
         const inputElement = find(el.value, (el) => {
-            return el.__vnode.key ===  latestInput;
+            return el.name === latestInput;
         });
 
         if(inputElement) {
@@ -113,5 +126,31 @@ watch(props.forcedVisibleSearchInputs, (inputs) => {
         }
     });
 }, { immediate: true });
-</script>
 
+// Theme
+const commonInputClasses = "flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md text-sm border-gray-300";
+const commonRemoveButtonClasses = "rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2";
+const fallbackTheme = {
+    input: {
+        base: "flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md text-sm",
+        color: {
+            primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
+            dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
+        },
+    },
+    remove_button: {
+        base: "rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
+        color: {
+            primary: "text-gray-400 hover:text-gray-500 focus:ring-indigo-500",
+            dootix: "text-gray-400 hover:text-gray-500 focus:ring-cyan-500",
+        },
+    },
+};
+const themeVariables = inject("themeVariables");
+const getTheme = (item) => {
+    return twMerge(
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.table_search_rows, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.table_search_rows, props.ui),
+    );
+};
+</script>

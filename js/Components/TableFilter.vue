@@ -2,16 +2,12 @@
   <ButtonWithDropdown
     placement="bottom-end"
     dusk="filters-dropdown"
-    :active="hasEnabledFilters"
+    :color="color"
   >
     <template #button>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="h-5 w-5"
-        :class="{
-          'text-gray-400': !hasEnabledFilters,
-          'text-green-400': hasEnabledFilters,
-        }"
+        class="h-5 w-5 text-gray-400"
         viewBox="0 0 20 20"
         fill="currentColor"
       >
@@ -21,6 +17,10 @@
           clip-rule="evenodd"
         />
       </svg>
+      <span
+        v-if="hasEnabledFilters"
+        class="ml-1"
+      >({{ activeFiltersCount }})</span>
     </template>
 
     <div
@@ -41,7 +41,7 @@
             v-if="filter.type === 'select'"
             :name="filter.key"
             :value="filter.value"
-            class="block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm text-sm border-gray-300 rounded-md"
+            :class="getTheme('select', color)"
             @change="onFilterChange(filter.key, $event.target.value)"
           >
             <option
@@ -52,6 +52,28 @@
               {{ option }}
             </option>
           </select>
+          <ToggleFilter
+            v-if="filter.type === 'toggle'"
+            :filter="filter"
+            :on-filter-change="onFilterChange"
+            :color="color"
+          />
+          <div
+            v-if="filter.type === 'number_range'"
+            class="py-4 px-8"
+            style="min-width: 250px;"
+          >
+            <NumberRangeFilter
+              v-model="filter.value"
+              :max="filter.max"
+              :min="filter.min"
+              :prefix="filter.prefix"
+              :suffix="filter.suffix"
+              :step="filter.step"
+              :color="color"
+              @update:model-value="updateNumberRangeFilter(filter)"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -60,8 +82,13 @@
 
 <script setup>
 import ButtonWithDropdown from "./ButtonWithDropdown.vue";
+import { computed, inject, ref } from "vue";
+import ToggleFilter from "./TableFilters/ToggleFilter.vue";
+import NumberRangeFilter from "./TableFilters/NumberRangeFilter.vue";
+import { twMerge } from "tailwind-merge";
+import { get_theme_part } from "../helpers.js";
 
-defineProps({
+const props = defineProps({
     hasEnabledFilters: {
         type: Boolean,
         required: true,
@@ -76,6 +103,72 @@ defineProps({
         type: Function,
         required: true,
     },
-});
-</script>
 
+    color: {
+        type: String,
+        default: "primary",
+        required: false,
+    },
+    ui: {
+        required: false,
+        type: Object,
+        default: {},
+    },
+});
+
+const timeout = ref(null);
+
+const activeFiltersCount = computed(() => {
+    return props.filters.filter((f) => !filterIsNull(f)).length;
+});
+
+function filterIsNull(filter) {
+    if (filter.value === null) return true;
+    switch (filter.type) {
+    case "number_range":
+        return  Number(Math.max(...filter.value)) === Number(filter.max) && Number(Math.min(...filter.value)) === Number(filter.min);
+    case "select":
+        return filter.value === "";
+    case "toggle":
+        return false;
+    default:
+        return !filter.value;
+    }
+}
+
+function updateNumberRangeFilter(filter) {
+    let value = filter.value;
+    if (filter.value) {
+        if (Number(Math.max(...filter.value)) === Number(filter.max) && Number(Math.min(...filter.value)) === Number(filter.min)) {
+            value = null;
+        } else if (Number(Math.min(...filter.value)) === 0 && Number(Math.max(...filter.value)) === 0) {
+            value = ["0", "0"];
+        }
+    }
+    props.onFilterChange(filter.key, value);
+}
+
+// Theme
+const commonSelectClasses = "block w-full shadow-sm text-sm border-gray-300 rounded-md";
+
+const fallbackTheme = {
+    inertia_table: {
+        table_filter: {
+            select: {
+                base: "block w-full shadow-sm text-sm rounded-md",
+                color: {
+                    primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
+                    dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
+                },
+            },
+        },
+    },
+};
+const themeVariables = inject("themeVariables");
+const getTheme = (item) => {
+    return twMerge(
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.table_filter?.select_filter, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.table_filter?.select_filter, props.ui),
+    );
+};
+</script>

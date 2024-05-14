@@ -1,11 +1,11 @@
 <?php
 
-namespace ProtoneMedia\LaravelQueryBuilderInertiaJs;
+namespace ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 
-class Filter implements Arrayable
+class Filter implements Arrayable, Filterable
 {
     public function __construct(
         public string $key,

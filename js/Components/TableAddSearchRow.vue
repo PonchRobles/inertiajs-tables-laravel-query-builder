@@ -4,6 +4,7 @@
     dusk="add-search-row-dropdown"
     :disabled="!hasSearchInputsWithoutValue"
     class="w-auto"
+    :color="color"
   >
     <template #button>
       <svg
@@ -59,6 +60,12 @@ const props = defineProps({
     onAdd: {
         type: Function,
         required: true,
+    },
+
+    color: {
+        type: String,
+        default: "primary",
+        required: false,
     },
 });
 
