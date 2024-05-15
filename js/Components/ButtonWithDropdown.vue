@@ -120,7 +120,7 @@ const fallbackTheme = {
     },
 };
 const themeVariables = inject("themeVariables");
-const getTheme = (type, name) => {
+const getTheme = (item) => {
     let additionalClasses = "";
     if (item === "button" && props.disabled) {
         additionalClasses = "cursor-not-allowed";

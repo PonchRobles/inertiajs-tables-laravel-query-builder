@@ -80,13 +80,14 @@ const fallbackTheme = {
 };
 const themeVariables = inject("themeVariables");
 const getTheme = (item) => {
-    let color = props.color;
-    if (item === "toggle" && props.filter.value === null) {
-        color = "disabled";
+    let additionalClasses = "";
+    if (item === "button" && props.disabled) {
+        additionalClasses = "cursor-not-allowed";
     }
     return twMerge(
-        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.table_filter?.toggle_filter, props.ui),
-        get_theme_part([item, "color", color], fallbackTheme, themeVariables?.inertia_table?.table_filter?.toggle_filter, props.ui),
+        additionalClasses,
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.button_with_dropdown, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.button_with_dropdown, props.ui),
     );
 };
 </script>
