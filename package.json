@@ -1,6 +1,6 @@
 {
-  "name": "@ponchrobles/inertiajs-tables-laravel-query-builder",
-  "version": "3.0.0",
+  "name": "@ponchrobles_/inertiajs-tables-laravel-query-builder",
+  "version": "3.0.1",
   "description": "Inertia.js Front-end Components for Spatie's Laravel Query Builder",
   "private": false,
   "author": "PonchRobles <ponchrobles@gmail.com>",
