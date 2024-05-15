@@ -45,21 +45,25 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+
     onFilterChange: {
         type: Function,
         required: true,
     },
+
     color: {
         type: String,
         default: "primary",
         required: false,
     },
+
     ui: {
         required: false,
         type: Object,
         default: {},
     },
 });
+
 // Theme
 const fallbackTheme = {
     toggle: {

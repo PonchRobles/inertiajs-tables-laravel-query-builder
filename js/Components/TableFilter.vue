@@ -109,6 +109,7 @@ const props = defineProps({
         default: "primary",
         required: false,
     },
+
     ui: {
         required: false,
         type: Object,
@@ -149,18 +150,12 @@ function updateNumberRangeFilter(filter) {
 }
 
 // Theme
-const commonSelectClasses = "block w-full shadow-sm text-sm border-gray-300 rounded-md";
-
 const fallbackTheme = {
-    inertia_table: {
-        table_filter: {
-            select: {
-                base: "block w-full shadow-sm text-sm rounded-md",
-                color: {
-                    primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
-                    dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
-                },
-            },
+    select: {
+        base: "block w-full shadow-sm text-sm rounded-md",
+        color: {
+            primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
+            dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
         },
     },
 };

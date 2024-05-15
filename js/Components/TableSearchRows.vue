@@ -38,7 +38,7 @@
         class="absolute inset-y-0 right-0 pr-3 flex items-center"
       >
         <button
-          :class="getTheme('input')"
+          :class="getTheme('remove_button')"
           :dusk="`remove-search-row-${searchInput.key}`"
           @click.prevent="onRemove(searchInput.key)"
         >
@@ -98,6 +98,7 @@ const props = defineProps({
         default: "primary",
         required: false,
     },
+
     ui: {
         required: false,
         type: Object,
@@ -118,7 +119,7 @@ watch(props.forcedVisibleSearchInputs, (inputs) => {
 
     nextTick().then(() => {
         const inputElement = find(el.value, (el) => {
-            return el.name === latestInput;
+            return el.name ===  latestInput;
         });
 
         if(inputElement) {
@@ -128,8 +129,6 @@ watch(props.forcedVisibleSearchInputs, (inputs) => {
 }, { immediate: true });
 
 // Theme
-const commonInputClasses = "flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md text-sm border-gray-300";
-const commonRemoveButtonClasses = "rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2";
 const fallbackTheme = {
     input: {
         base: "flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md text-sm",

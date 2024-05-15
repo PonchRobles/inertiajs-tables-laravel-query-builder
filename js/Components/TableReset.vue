@@ -19,20 +19,24 @@
         clip-rule="evenodd"
       />
     </svg>
-    <span>Reset</span>
+    <span>{{ translations.reset ?? 'Reset' }}</span>
   </button>
 </template>
 
 <script setup>
 import { inject } from "vue";
+import { getTranslations } from "../translations.js";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../helpers.js";
+
+const translations = getTranslations();
 
 const props = defineProps({
     onClick: {
         type: Function,
         required: true
     },
+
     color: {
         type: String,
         default: "primary",
@@ -47,17 +51,12 @@ const props = defineProps({
 });
 
 // Theme
-const commonClasses = "w-full bg-white border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 border-gray-300";
 const fallbackTheme = {
-    inertia_table: {
-        reset_button: {
-            button: {
-                base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
-                color: {
-                    primary: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-indigo-500",
-                    dootix: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-cyan-500",
-                },
-            },
+    button: {
+        base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
+        color: {
+            primary: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-indigo-500",
+            dootix: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-cyan-500",
         },
     },
 };

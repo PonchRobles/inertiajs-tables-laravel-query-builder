@@ -215,6 +215,9 @@ export default {
             this.detectIfOverlap();
         },
     },
+    mounted() {
+        this.detectIfOverlap();
+    },
     beforeMount() {
         this.fallbackTheme = {
             main_bar: {
@@ -258,9 +261,6 @@ export default {
                 },
             },
         };
-    },
-    mounted() {
-        this.detectIfOverlap();
     },
     methods: {
         getMarginTop(isDown) {

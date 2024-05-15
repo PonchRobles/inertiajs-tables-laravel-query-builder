@@ -62,14 +62,13 @@ const props = defineProps({
     },
 });
 
+// Theme
 const fallbackTheme = {
-    inertia_table: {
-        global_search: {
-            base: "block w-full pl-9 text-sm rounded-md shadow-sm",
-            color: {
-                primary: "focus:ring-indigo-500 focus:border-indigo-500 border-gray-300",
-                dootix: "focus:ring-cyan-500 focus:border-blue-500 border-gray-300",
-            },
+    input: {
+        base: "block w-full pl-9 text-sm rounded-md shadow-sm",
+        color: {
+            primary: "focus:ring-indigo-500 focus:border-indigo-500 border-gray-300",
+            dootix: "focus:ring-cyan-500 focus:border-blue-500 border-gray-300",
         },
     },
 };

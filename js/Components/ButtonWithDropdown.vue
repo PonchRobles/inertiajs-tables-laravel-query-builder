@@ -67,6 +67,7 @@ const props = defineProps({
         default: "primary",
         required: false,
     },
+
     ui: {
         required: false,
         type: Object,
@@ -107,15 +108,11 @@ defineExpose({ hide });
 // Theme
 const commonClasses = "w-full bg-white border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 border-gray-300";
 const fallbackTheme = {
-    inertia_table: {
-        button_with_dropdown: {
-            button: {
-                base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
-                color: {
-                    primary: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-indigo-500",
-                    dootix: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-cyan-500",
-                },
-            },
+    button: {
+        base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
+        color: {
+            primary: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-indigo-500",
+            dootix: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-cyan-500",
         },
     },
 };

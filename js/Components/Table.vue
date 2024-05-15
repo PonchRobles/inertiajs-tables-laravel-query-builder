@@ -25,9 +25,11 @@
               :label="queryBuilderProps.globalSearch.label"
               :value="queryBuilderProps.globalSearch.value"
               :on-change="changeGlobalSearchValue"
+              :color="color"
             />
           </slot>
         </div>
+
         <div class="mr-2 sm:mr-4">
           <slot
             name="tableFilter"
@@ -65,6 +67,7 @@
         </slot>
 
         <slot
+          v-if="!withGroupedMenu"
           name="tableColumns"
           :has-columns="queryBuilderProps.hasToggleableColumns"
           :columns="queryBuilderProps.columns"
@@ -74,13 +77,13 @@
           <TableColumns
             v-if="queryBuilderProps.hasToggleableColumns"
             :class="{ 'mr-2 sm:mr-4' : canBeReset }"
-            class="mr-2 sm:mr-4"
             :columns="queryBuilderProps.columns"
             :has-hidden-columns="queryBuilderProps.hasHiddenColumns"
             :on-change="changeColumnStatus"
             :color="color"
           />
         </slot>
+
         <slot
           v-if="withGroupedMenu"
           name="groupedAction"
@@ -91,7 +94,9 @@
             :actions="defaultActions"
           />
         </slot>
+
         <slot
+          v-if="!withGroupedMenu"
           name="tableReset"
           :can-be-reset="canBeReset"
           :on-click="resetQuery"
@@ -114,7 +119,6 @@
         :search-inputs="queryBuilderProps.searchInputsWithoutGlobal"
         :forced-visible-search-inputs="forcedVisibleSearchInputs"
         :on-change="changeSearchInputValue"
-        :color="color"
       >
         <TableSearchRows
           v-if="queryBuilderProps.hasSearchInputsWithValue || forcedVisibleSearchInputs.length > 0"
@@ -312,10 +316,11 @@ const props = defineProps({
         type: String,
         default: "primary",
         required: false,
-    }
+    },
 });
 
 const app = getCurrentInstance();
+
 const updates = ref(0);
 
 const queryBuilderProps = computed(() => {
@@ -511,7 +516,6 @@ function changeGlobalSearchValue(value) {
 
 function changeFilterValue(key, value) {
     const intKey = findDataKey("filters", key);
-
     queryBuilderData.value.filters[intKey].value = value;
     queryBuilderData.value.cursor = null;
     queryBuilderData.value.page = 1;
@@ -618,6 +622,7 @@ function visitPageFromUrl(url) {
     if(!url) {
         return null;
     }
+
     const pageName = usePage().props.queryBuilderProps[props.name].pageName ?? "page";
     const page = new URL(url)?.searchParams?.get(pageName);
     if(page !== null) {

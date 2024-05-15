@@ -21,8 +21,7 @@
       <span
         v-if="hasHiddenColumns"
         class="ml-1"
-      >({{ hiddenColumnsCount }})
-      </span>
+      >({{ hiddenColumnsCount }})</span>
     </template>
 
     <div
@@ -34,7 +33,7 @@
       <div class="px-2">
         <ul class="divide-y divide-gray-200">
           <li
-            v-for="(column, key) in usePage().columns"
+            v-for="(column, key) in props.columns"
             v-show="column.can_be_hidden"
             :key="key"
             class="py-2 flex items-center justify-between"
@@ -95,6 +94,7 @@ const props = defineProps({
         type: Function,
         required: true,
     },
+
     color: {
         type: String,
         default: "primary",

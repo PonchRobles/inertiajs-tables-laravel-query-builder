@@ -3,14 +3,13 @@
     name="per_page"
     :dusk="dusk"
     :value="value"
-    class="block focus:ring-indigo-500 focus:border-indigo-500 min-w-max shadow-sm text-sm border-gray-300 rounded-md"
+    :class="getTheme('select')"
     @change="onChange($event.target.value)"
   >
     <option
       v-for="option in perPageOptions"
       :key="option"
       :value="option"
-      :class="getTheme('select')"
     >
       {{ option }} {{ translations.per_page }}
     </option>
@@ -74,17 +73,12 @@ const perPageOptions = computed(() => {
 });
 
 // Theme
-const commonClasses = "block min-w-max shadow-sm text-sm border-gray-300 rounded-md";
 const fallbackTheme = {
-    inertia_table: {
-        per_page_selector: {
-            select: {
-                base: "block min-w-max shadow-sm text-sm rounded-md",
-                color: {
-                    primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
-                    dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
-                },
-            },
+    select: {
+        base: "block min-w-max shadow-sm text-sm rounded-md",
+        color: {
+            primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
+            dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
         },
     },
 };
