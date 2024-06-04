@@ -2,9 +2,10 @@
 
 [![Latest Version on NPM](https://img.shields.io/npm/v/@ponchrobles_/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://npmjs.com/package/@ponchrobles_/inertiajs-tables-laravel-query-builder)
 [![npm](https://img.shields.io/npm/dt/@ponchrobles_/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://www.npmjs.com/package/@ponchrobles_/inertiajs-tables-laravel-query-builder)
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/ponchrobles_/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://packagist.org/packages/ponchrobles_/inertiajs-tables-laravel-query-builder)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/ponchrobles/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://packagist.org/packages/ponchrobles/inertiajs-tables-laravel-query-builder)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![run-tests](https://github.com/ponchrobles/inertiajs-tables-laravel-query-builder/actions/workflows/php.yml/badge.svg?branch=main)](https://github.com/ponchrobles/inertiajs-tables-laravel-query-builder/actions/workflows/php.yml)
+
+## [Fork reason](https://github.com/protonemedia/inertiajs-tables-laravel-query-builder/issues/122)
 
 This package provides a *DataTables-like* experience for [Inertia.js](https://inertiajs.com/) with support for searching, filtering, sorting, toggling columns, and pagination. It generates URLs that can be consumed by Spatie's excellent [Laravel Query Builder](https://github.com/spatie/laravel-query-builder) package, with no additional logic needed. The components are styled with [Tailwind CSS 3.0](https://tailwindcss.com/), but it's fully customizable with slots. The data refresh logic is based on Inertia's [Ping CRM demo](https://github.com/inertiajs/pingcrm).
 
@@ -28,8 +29,6 @@ This package provides a *DataTables-like* experience for [Inertia.js](https://in
 * [Inertia.js](https://inertiajs.com/)
 * [Tailwind CSS v3](https://tailwindcss.com/) + [Forms plugin](https://github.com/tailwindlabs/tailwindcss-forms)
 * PHP 8.2+
-
-**Note**: There is currently an [issue](https://github.com/protonemedia/inertiajs-tables-laravel-query-builder/issues/69) with using this package with Vite!
 
 ## Installation
 
@@ -56,13 +55,13 @@ Though it's enough to pass in the column key, you may specify a custom label and
 use ProtoneMedia\LaravelQueryBuilderInertiaJs\InertiaTable;
 
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
-    $table->searchInput('name');
+	$table->searchInput('name');
 
-    $table->searchInput(
-        key: 'framework',
-        label: 'Find your framework',
-        defaultValue: 'Laravel'
-    );
+	$table->searchInput(
+		key: 'framework',
+		label: 'Find your framework',
+		defaultValue: 'Laravel'
+	);
 });
 ```
 
@@ -74,10 +73,10 @@ The `selectFilter` method requires two arguments: the key, and a key-value array
 
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
-    $table->selectFilter('language_code', [
-        'en' => 'Engels',
-        'nl' => 'Nederlands',
-    ]);
+	$table->selectFilter('language_code', [
+		'en' => 'Engels',
+		'nl' => 'Nederlands',
+	]);
 });
 ```
 
@@ -85,14 +84,14 @@ The `selectFilter` will, by default, add a *no filter* option to the array. You 
 
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
-    $table->selectFilter(
-        key: 'language_code',
-        options: $languages,
-        label: 'Language',
-        defaultValue: 'nl',
-        noFilterOption: true,
-        noFilterOptionLabel: 'All languages'
-    );
+	$table->selectFilter(
+		key: 'language_code',
+		options: $languages,
+		label: 'Language',
+		defaultValue: 'nl',
+		noFilterOption: true,
+		noFilterOptionLabel: 'All languages'
+	);
 });
 ```
 
@@ -104,7 +103,7 @@ The `toggleFilter` method requires one argument: the key.
 
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
-    $table->toggleFilter('is_verified');
+	$table->toggleFilter('is_verified');
 });
 ```
 
@@ -112,11 +111,11 @@ You can specify a custom label for it and a default value.
 
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
-    $table->toggleFilter(
-        key: 'is_verified',
-        label: 'Is email verified',
-        defaultValue: true,
-    );
+	$table->toggleFilter(
+		key: 'is_verified',
+		label: 'Is email verified',
+		defaultValue: true,
+	);
 });
 ```
 
@@ -128,30 +127,30 @@ The `numberRangeFilter` method requires two arguments: the key and the max value
 
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
-    $table->numberRangeFilter('invoice_recall_count', 5);
+	$table->numberRangeFilter('invoice_recall_count', 5);
 });
 ```
 
 You can specify a some other params.
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
-    $table->toggleFilter(
-        key: 'invoice_recall_count',
-        max: 5,
-        min: 0,
-        prefix: '',
-        suffix: '',
-        step: 1,
-        label: 'Invoice recall count',
-        defaultValue: [1,4],
-    );
+	$table->toggleFilter(
+		key: 'invoice_recall_count',
+		max: 5,
+		min: 0,
+		prefix: '',
+		suffix: '',
+		step: 1,
+		label: 'Invoice recall count',
+		defaultValue: [1,4],
+	);
 });
 ```
 
 You need to use a custom allowed filter for this filter.
 ```php
 $users = QueryBuilder::for(/*...*/)
-            ->allowedFilters([NumberRangeFilter::getQueryBuilderFilter('invoice_recall_count')]);
+			->allowedFilters([NumberRangeFilter::getQueryBuilderFilter('invoice_recall_count')]);
 ```
 
 #### Columns
@@ -160,16 +159,16 @@ With the `column` method, you can specify which columns you want to be toggleabl
 
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
-    $table->column('name', 'User Name');
+	$table->column('name', 'User Name');
 
-    $table->column(
-        key: 'name',
-        label: 'User Name',
-        canBeHidden: true,
-        hidden: false,
-        sortable: true,
-        searchable: true
-    );
+	$table->column(
+		key: 'name',
+		label: 'User Name',
+		canBeHidden: true,
+		hidden: false,
+		sortable: true,
+		searchable: true
+	);
 });
 ```
 
@@ -181,9 +180,9 @@ You may enable Global Search with the `withGlobalSearch` method, and optionally 
 
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
-    $table->withGlobalSearch();
+	$table->withGlobalSearch();
 
-    $table->withGlobalSearch('Search through the data...');
+	$table->withGlobalSearch('Search through the data...');
 });
 ```
 
@@ -211,40 +210,40 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class UserIndexController
 {
-    public function __invoke()
-    {
-        $globalSearch = AllowedFilter::callback('global', function ($query, $value) {
-            $query->where(function ($query) use ($value) {
-                Collection::wrap($value)->each(function ($value) use ($query) {
-                    $query
-                        ->orWhere('name', 'LIKE', "%{$value}%")
-                        ->orWhere('email', 'LIKE', "%{$value}%");
-                });
-            });
-        });
+	public function __invoke()
+	{
+		$globalSearch = AllowedFilter::callback('global', function ($query, $value) {
+			$query->where(function ($query) use ($value) {
+				Collection::wrap($value)->each(function ($value) use ($query) {
+					$query
+						->orWhere('name', 'LIKE', "%{$value}%")
+						->orWhere('email', 'LIKE', "%{$value}%");
+				});
+			});
+		});
 
-        $users = QueryBuilder::for(User::class)
-            ->defaultSort('name')
-            ->allowedSorts(['name', 'email', 'language_code'])
-            ->allowedFilters(['name', 'email', 'language_code', $globalSearch])
-            ->paginate()
-            ->withQueryString();
+		$users = QueryBuilder::for(User::class)
+			->defaultSort('name')
+			->allowedSorts(['name', 'email', 'language_code'])
+			->allowedFilters(['name', 'email', 'language_code', $globalSearch])
+			->paginate()
+			->withQueryString();
 
-        return Inertia::render('Users/Index', [
-            'users' => $users,
-        ])->table(function (InertiaTable $table) {
-            $table
-              ->withGlobalSearch()
-              ->defaultSort('name')
-              ->column(key: 'name', searchable: true, sortable: true, canBeHidden: false)
-              ->column(key: 'email', searchable: true, sortable: true)
-              ->column(key: 'language_code', label: 'Language')
-              ->column(label: 'Actions')
-              ->selectFilter(key: 'language_code', label: 'Language', options: [
-                  'en' => 'English',
-                  'nl' => 'Dutch',
-              ]);
-    }
+		return Inertia::render('Users/Index', [
+			'users' => $users,
+		])->table(function (InertiaTable $table) {
+			$table
+			  ->withGlobalSearch()
+			  ->defaultSort('name')
+			  ->column(key: 'name', searchable: true, sortable: true, canBeHidden: false)
+			  ->column(key: 'email', searchable: true, sortable: true)
+			  ->column(key: 'language_code', label: 'Language')
+			  ->column(label: 'Actions')
+			  ->selectFilter(key: 'language_code', label: 'Language', options: [
+				  'en' => 'English',
+				  'nl' => 'Dutch',
+			  ]);
+	}
 }
 ```
 
@@ -263,7 +262,7 @@ Add the repository path to the `content` array of your [Tailwind configuration f
 ```js
 module.exports = {
   content: [
-    './node_modules/@ponchrobles_/inertiajs-tables-laravel-query-builder/**/*.{js,vue}',
+	'./node_modules/@ponchrobles_/inertiajs-tables-laravel-query-builder/**/*.{js,vue}',
   ]
 }
 ```
@@ -297,20 +296,20 @@ If you want to manually render the table, like in v1 of this package, you may us
 ```vue
 <template>
   <Table :meta="users">
-    <template #head>
-      <tr>
-        <th>User</th>
-      </tr>
-    </template>
+	<template #head>
+	  <tr>
+		<th>User</th>
+	  </tr>
+	</template>
 
-    <template #body>
-      <tr
-        v-for="(user, key) in users.data"
-        :key="key"
-      >
-        <td>{{ user.name }}</td>
-      </tr>
-    </template>
+	<template #body>
+	  <tr
+		v-for="(user, key) in users.data"
+		:key="key"
+	  >
+		<td>{{ user.name }}</td>
+	  </tr>
+	</template>
   </Table>
 </template>
 ```
@@ -320,20 +319,20 @@ The `Table` has some additional properties to tweak its front-end behaviour.
 ```vue
 <template>
   <Table
-    :striped="true"
-    :prevent-overlapping-requests="false"
-    :input-debounce-ms="1000"
-    :preserve-scroll="true"
+	:striped="true"
+	:prevent-overlapping-requests="false"
+	:input-debounce-ms="1000"
+	:preserve-scroll="true"
   />
 </template>
 ```
 
-| Property | Description | Default |
-| --- | --- | --- |
-| striped | Adds a *striped* layout to the table. | `false` |
-| preventOverlappingRequests | Cancels a previous visit on new user input to prevent an inconsistent state. | `true` |
-| inputDebounceMs | Number of ms to wait before refreshing the table on user input. | 350 |
-| preserveScroll | Configures the [Scroll preservation](https://inertiajs.com/scroll-management#scroll-preservation) behavior. You may also pass `table-top` to this property to scroll to the top of the table on new data. | false |
+| Property                   | Description                                                                                                                                                                                               | Default |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| striped                    | Adds a *striped* layout to the table.                                                                                                                                                                     | `false` |
+| preventOverlappingRequests | Cancels a previous visit on new user input to prevent an inconsistent state.                                                                                                                              | `true`  |
+| inputDebounceMs            | Number of ms to wait before refreshing the table on user input.                                                                                                                                           | 350     |
+| preserveScroll             | Configures the [Scroll preservation](https://inertiajs.com/scroll-management#scroll-preservation) behavior. You may also pass `table-top` to this property to scroll to the top of the table on new data. | false   |
 
 The `Table` has some events that you can use
 
@@ -346,11 +345,11 @@ When using *auto-fill*, you may want to transform the presented data for a speci
 ```vue
 <template>
   <Table :resource="users">
-    <template #cell(actions)="{ item: user }">
-      <a :href="`/users/${user.id}/edit`">
-        Edit
-      </a>
-    </template>
+	<template #cell(actions)="{ item: user }">
+	  <a :href="`/users/${user.id}/edit`">
+		Edit
+	  </a>
+	</template>
   </Table>
 </template>
 ```
@@ -362,9 +361,9 @@ When using *auto-fill*, you may want to transform the presented data for a speci
 ```vue
 <template>
   <Table :resource="users">
-    <template #header(email)="{ label: label, column: column }">
-      <span class="lowercase">{{ label }}</span>
-    </template>
+	<template #header(email)="{ label: label, column: column }">
+	  <span class="lowercase">{{ label }}</span>
+	</template>
   </Table>
 </template>
 ```
@@ -379,42 +378,42 @@ Let's take a look at Spatie's `QueryBuilder`. In this example, there's a table f
 InertiaTable::updateQueryBuilderParameters('companies');
 
 $companies = QueryBuilder::for(Company::query())
-    ->defaultSort('name')
-    ->allowedSorts(['name', 'email'])
-    ->allowedFilters(['name', 'email'])
-    ->paginate(pageName: 'companiesPage')
-    ->withQueryString();
+	->defaultSort('name')
+	->allowedSorts(['name', 'email'])
+	->allowedFilters(['name', 'email'])
+	->paginate(pageName: 'companiesPage')
+	->withQueryString();
 
 InertiaTable::updateQueryBuilderParameters('users');
 
 $users = QueryBuilder::for(User::query())
-    ->defaultSort('name')
-    ->allowedSorts(['name', 'email'])
-    ->allowedFilters(['name', 'email'])
-    ->paginate(pageName: 'usersPage')
-    ->withQueryString();
+	->defaultSort('name')
+	->allowedSorts(['name', 'email'])
+	->allowedFilters(['name', 'email'])
+	->paginate(pageName: 'usersPage')
+	->withQueryString();
 ```
 
 Then, we need to apply these two changes to the `InertiaTable` class. There's a `name` and `pageName` method to do so.
 
 ```php
 return Inertia::render('TwoTables', [
-    'companies' => $companies,
-    'users'     => $users,
+	'companies' => $companies,
+	'users'     => $users,
 ])->table(function (InertiaTable $inertiaTable) {
-    $inertiaTable
-        ->name('users')
-        ->pageName('usersPage')
-        ->defaultSort('name')
-        ->column(key: 'name', searchable: true)
-        ->column(key: 'email', searchable: true);
+	$inertiaTable
+		->name('users')
+		->pageName('usersPage')
+		->defaultSort('name')
+		->column(key: 'name', searchable: true)
+		->column(key: 'email', searchable: true);
 })->table(function (InertiaTable $inertiaTable) {
-    $inertiaTable
-        ->name('companies')
-        ->pageName('companiesPage')
-        ->defaultSort('name')
-        ->column(key: 'name', searchable: true)
-        ->column(key: 'address', searchable: true);
+	$inertiaTable
+		->name('companies')
+		->pageName('companiesPage')
+		->defaultSort('name')
+		->column(key: 'name', searchable: true)
+		->column(key: 'address', searchable: true);
 });
 ```
 
@@ -429,15 +428,15 @@ defineProps(["companies", "users"])
 
 <template>
   <Table
-    :resource="companies"
-    name="companies"
-    preserve-scroll="table-top"
+	:resource="companies"
+	name="companies"
+	preserve-scroll="table-top"
   />
 
   <Table
-    :resource="users"
-    name="users"
-    preserve-scroll="table-top"
+	:resource="users"
+	name="users"
+	preserve-scroll="table-top"
   />
 </template>
 ```
@@ -469,33 +468,33 @@ setTranslations({
 
 The `Table.vue` has several slots that you can use to inject your own implementations.
 
-| Slot                   | Description                                                                        |
-|------------------------|------------------------------------------------------------------------------------|
-| table                  | The actual table element.                                                          |
-| tableColumns           | The location of the button + dropdown to toggle columns.                           |
-| tableFilter            | The location of the button + dropdown to select filters.                           |
-| tableGlobalSearch      | The location of the input element that handles the global search.                  |
-| tableReset             | The location of the button that resets the table.                                  |
-| tableAddSearchRow      | The location of the button + dropdown to add additional search rows.               |
-| tableSearchRows        | The location of the input elements that handle the additional search rows.         |
-| tableWrapper           | The component that *wraps* the table element, handling overflow, shadow, padding, etc. |
-| head                   | The location of the table header.                                                  |
-| body                   | The location of the table body.                                                    |
-| with-grouped-menu | Use the grouped menu instead of multiple buttons
-| pagination             | The location of the paginator.                                                     |
-| color              | The style of the table                                                             |
+| Slot              | Description                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| table             | The actual table element.                                                              |
+| tableColumns      | The location of the button + dropdown to toggle columns.                               |
+| tableFilter       | The location of the button + dropdown to select filters.                               |
+| tableGlobalSearch | The location of the input element that handles the global search.                      |
+| tableReset        | The location of the button that resets the table.                                      |
+| tableAddSearchRow | The location of the button + dropdown to add additional search rows.                   |
+| tableSearchRows   | The location of the input elements that handle the additional search rows.             |
+| tableWrapper      | The component that *wraps* the table element, handling overflow, shadow, padding, etc. |
+| head              | The location of the table header.                                                      |
+| body              | The location of the table body.                                                        |
+| with-grouped-menu | Use the grouped menu instead of multiple buttons                                       |
+| pagination        | The location of the paginator.                                                         |
+| color             | The style of the table                                                                 |
 
 Each slot is provided with props to interact with the parent `Table` component.
 
 ```vue
 <template>
   <Table>
-    <template v-slot:tableGlobalSearch="slotProps">
-      <input
-        placeholder="Custom Global Search Component..."
-        @input="slotProps.onChange($event.target.value)"
-      />
-    </template>
+	<template v-slot:tableGlobalSearch="slotProps">
+	  <input
+		placeholder="Custom Global Search Component..."
+		@input="slotProps.onChange($event.target.value)"
+	  />
+	</template>
   </Table>
 </template>
 ```
@@ -507,56 +506,56 @@ You can customize some parts of the table.
 Provide an object with the desired customizations in `app.js` file like this:
 ```javascript
 const themeVariables = {
-    inertia_table: {
-        per_page_selector: {
-            select: {
-                primary: 'your classes',
-            },
-        },
-    },
+	inertia_table: {
+		per_page_selector: {
+			select: {
+				primary: 'your classes',
+			},
+		},
+	},
 }
 
 createInertiaApp({
-    progress: {
-        color: '#4B5563',
-    },
-    title: (title) => `${title} - ${appName}`,
-    resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
-    setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
-            // ...
-            .provide('themeVariables', themeVariables)
-            // ...
-            .mount(el);
-    },
+	progress: {
+		color: '#4B5563',
+	},
+	title: (title) => `${title} - ${appName}`,
+	resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
+	setup({ el, App, props, plugin }) {
+		return createApp({ render: () => h(App, props) })
+			// ...
+			.provide('themeVariables', themeVariables)
+			// ...
+			.mount(el);
+	},
 })
 ```
 You can customize the default style by overiding the default style like that:
 ```javascript
 const themeVariables = {
-    inertia_table: {
-        per_page_selector: {
-            select: {
-                base: "block min-w-max shadow-sm text-sm rounded-md",
-                color: {
-                    primary: "border-gray-300 focus:ring-yellow-500 focus:border-yellow-500",
-                },
-            },
-        },
-    },
+	inertia_table: {
+		per_page_selector: {
+			select: {
+				base: "block min-w-max shadow-sm text-sm rounded-md",
+				color: {
+					primary: "border-gray-300 focus:ring-yellow-500 focus:border-yellow-500",
+				},
+			},
+		},
+	},
 }
 ```
 Or you can create a new style and using the `color` prop on the `Table.vue`
 ```javascript
 const themeVariables = {
-    inertia_table: {
-         select: {
-              base: "block min-w-max shadow-sm text-sm rounded-md",
-              color: {
-                  red_style: 'border-gray-300 focus:ring-red-500 focus:border-red-500',
-              },
-          },
-    },
+	inertia_table: {
+		 select: {
+			  base: "block min-w-max shadow-sm text-sm rounded-md",
+			  color: {
+				  red_style: 'border-gray-300 focus:ring-red-500 focus:border-red-500',
+			  },
+		  },
+	},
 }
 ```
 ```vue
@@ -567,123 +566,123 @@ const themeVariables = {
 Available customizations
 ```javascript
 const themeVariables = {
-    inertia_table: {
-        button_with_dropdown: {
-            button: {
-                 base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
-                color: {
-                    primary: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-indigo-500",
-                    dootix: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-cyan-500",
-                },
-            },
-        },
-        per_page_selector: {
-            select: {
-                base: "block min-w-max shadow-sm text-sm rounded-md",
-                color: {
-                    primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
-                    dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
-                },
-            },
-        },
-        table_filter: {
-           select_filter: {
-                select: {
-                    base: "block w-full shadow-sm text-sm rounded-md",
-                    color: {
-                        primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
-                        dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
-                    },
-                },
-        },
-        togle_filter: {
-            toggle: {
-                base: "w-11 h-6 rounded-full after:border after:rounded-full after:h-5 after:w-5",
-                color: {
-                    primary: "after:bg-white after:border-white peer-checked:bg-indigo-500 bg-red-500",
-                    dootix: "after:bg-white after:border-white peer-checked:bg-gradient-to-r peer-checked:from-cyan-500 peer-checked:to-blue-600 bg-red-500",
-                    disabled: "after:bg-white after:border-white bg-gray-200",
-                }
-            },
-            reset_button: {
-                base: "rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
-                color: {
-                    primary: "text-gray-400 hover:text-gray-500 focus:ring-indigo-500",
-                    dootix: "text-gray-400 hover:text-gray-500 focus:ring-cyan-500",
-                },
-        },
-           number_range_filter: {
-                main_bar: {
-                    base: "h-2 rounded-full",
-                    color: {
-                        primary: "bg-gray-200",
-                        dootix: "bg-gray-200",
-                    },
-                },
-                selected_bar: {
-                    base: "h-2 rounded-full",
-                    color: {
-                        primary: "bg-indigo-600",
-                        dootix: "bg-gradient-to-r from-cyan-500 to-blue-600",
-                    },
-                },
-                button: {
-                    base: "h-4 w-4 rounded-full shadow border",
-                    color: {
-                        primary: "bg-white border-gray-300",
-                        dootix: "bg-white border-gray-300",
-                    },
-                },
-                popover: {
-                    base: "truncate text-xs rounded py-1 px-4",
-                    color: {
-                        primary: "bg-gray-600 text-white",
-                        dootix: "bg-gray-600 text-white",
-                    },
-                },
-                popover_arrow: {
-                    color: {
-                        primary: "text-gray-600",
-                        dootix: "text-gray-600",
-                    },
-                },
-                text: {
-                    color: {
-                        primary: "text-gray-700",
-                        dootix: "text-gray-700",
-                    },
-                },
-        global_search: {
-             base: "block w-full pl-9 text-sm rounded-md shadow-sm",
-                color: {
-                    primary: "focus:ring-indigo-500 focus:border-indigo-500 border-gray-300",
-                    dootix: "focus:ring-cyan-500 focus:border-blue-500 border-gray-300",
-                },
-        },
-        reset_button: {
-             base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
-                color: {
-                    primary: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-indigo-500",
-                    dootix: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-cyan-500",
-                },
-        },
-        table_search_rows: {
-            input: {
-                base: "flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md text-sm",
-                color: {
-                    primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
-                    dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
-                },
-            },
-            remove_button: {
-                base: "rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
-                color: {
-                    primary: "text-gray-400 hover:text-gray-500 focus:ring-indigo-500",
-                    dootix: "text-gray-400 hover:text-gray-500 focus:ring-cyan-500",
-                },
-            },
-        },
-    },
+	inertia_table: {
+		button_with_dropdown: {
+			button: {
+				 base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
+				color: {
+					primary: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-indigo-500",
+					dootix: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-cyan-500",
+				},
+			},
+		},
+		per_page_selector: {
+			select: {
+				base: "block min-w-max shadow-sm text-sm rounded-md",
+				color: {
+					primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
+					dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
+				},
+			},
+		},
+		table_filter: {
+		   select_filter: {
+				select: {
+					base: "block w-full shadow-sm text-sm rounded-md",
+					color: {
+						primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
+						dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
+					},
+				},
+		},
+		togle_filter: {
+			toggle: {
+				base: "w-11 h-6 rounded-full after:border after:rounded-full after:h-5 after:w-5",
+				color: {
+					primary: "after:bg-white after:border-white peer-checked:bg-indigo-500 bg-red-500",
+					dootix: "after:bg-white after:border-white peer-checked:bg-gradient-to-r peer-checked:from-cyan-500 peer-checked:to-blue-600 bg-red-500",
+					disabled: "after:bg-white after:border-white bg-gray-200",
+				}
+			},
+			reset_button: {
+				base: "rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
+				color: {
+					primary: "text-gray-400 hover:text-gray-500 focus:ring-indigo-500",
+					dootix: "text-gray-400 hover:text-gray-500 focus:ring-cyan-500",
+				},
+		},
+		   number_range_filter: {
+				main_bar: {
+					base: "h-2 rounded-full",
+					color: {
+						primary: "bg-gray-200",
+						dootix: "bg-gray-200",
+					},
+				},
+				selected_bar: {
+					base: "h-2 rounded-full",
+					color: {
+						primary: "bg-indigo-600",
+						dootix: "bg-gradient-to-r from-cyan-500 to-blue-600",
+					},
+				},
+				button: {
+					base: "h-4 w-4 rounded-full shadow border",
+					color: {
+						primary: "bg-white border-gray-300",
+						dootix: "bg-white border-gray-300",
+					},
+				},
+				popover: {
+					base: "truncate text-xs rounded py-1 px-4",
+					color: {
+						primary: "bg-gray-600 text-white",
+						dootix: "bg-gray-600 text-white",
+					},
+				},
+				popover_arrow: {
+					color: {
+						primary: "text-gray-600",
+						dootix: "text-gray-600",
+					},
+				},
+				text: {
+					color: {
+						primary: "text-gray-700",
+						dootix: "text-gray-700",
+					},
+				},
+		global_search: {
+			 base: "block w-full pl-9 text-sm rounded-md shadow-sm",
+				color: {
+					primary: "focus:ring-indigo-500 focus:border-indigo-500 border-gray-300",
+					dootix: "focus:ring-cyan-500 focus:border-blue-500 border-gray-300",
+				},
+		},
+		reset_button: {
+			 base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
+				color: {
+					primary: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-indigo-500",
+					dootix: "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 focus:ring-cyan-500",
+				},
+		},
+		table_search_rows: {
+			input: {
+				base: "flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md text-sm",
+				color: {
+					primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
+					dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
+				},
+			},
+			remove_button: {
+				base: "rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
+				color: {
+					primary: "text-gray-400 hover:text-gray-500 focus:ring-indigo-500",
+					dootix: "text-gray-400 hover:text-gray-500 focus:ring-cyan-500",
+				},
+			},
+		},
+	},
 }
 ```
 
@@ -724,12 +723,6 @@ php artisan dusk
 * The `setTranslations` method is no longer part of the `Pagination` component, but should be imported.
 * The templates and logic of the components are not separated anymore. Use slots to inject your own implementations.
 
-## v2.1 Roadmap
-
-* Date filters
-* Date range filters
-* Switch to Vite for the demo app
-
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
@@ -738,28 +731,15 @@ Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recen
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
-## Other Laravel packages
-
-* [`Laravel Analytics Event Tracking`](https://github.com/protonemedia/laravel-analytics-event-tracking): Laravel package to easily send events to Google Analytics.
-* [`Laravel Blade On Demand`](https://github.com/protonemedia/laravel-blade-on-demand): Laravel package to compile Blade templates in memory.
-* [`Laravel Cross Eloquent Search`](https://github.com/protonemedia/laravel-cross-eloquent-search): Laravel package to search through multiple Eloquent models.
-* [`Laravel Eloquent Scope as Select`](https://github.com/protonemedia/laravel-eloquent-scope-as-select): Stop duplicating your Eloquent query scopes and constraints in PHP. This package lets you re-use your query scopes and constraints by adding them as a subquery.
-* [`Laravel Eloquent Where Not`](https://github.com/protonemedia/laravel-eloquent-where-not): This Laravel package allows you to flip/invert an Eloquent scope, or really any query constraint.
-* [`Laravel FFMpeg`](https://github.com/protonemedia/laravel-ffmpeg): This package provides an integration with FFmpeg for Laravel. The storage of the files is handled by Laravel's Filesystem.
-* [`Laravel Form Components`](https://github.com/protonemedia/laravel-form-components): Blade components to rapidly build forms with Tailwind CSS Custom Forms and Bootstrap 4. Supports validation, model binding, default values, translations, includes default vendor styling and fully customizable!
-* [`Laravel Mixins`](https://github.com/protonemedia/laravel-mixins): A collection of Laravel goodies.
-* [`Laravel Verify New Email`](https://github.com/protonemedia/laravel-verify-new-email): This package adds support for verifying new email addresses: when a user updates its email address, it won't replace the old one until the new one is verified.
-* [`Laravel Paddle`](https://github.com/protonemedia/laravel-paddle): Paddle.com API integration for Laravel with support for webhooks/events.
-* [`Laravel WebDAV`](https://github.com/protonemedia/laravel-webdav): WebDAV driver for Laravel's Filesystem.
-
 ## Security
 
-If you discover any security related issues, please email pascal@protone.media instead of using the issue tracker.
+If you discover any security related issues, please email alfonsorodriguez@live.com.mx instead of using the issue tracker.
 
 ## Credits
 
 - [Pascal Baljet](https://github.com/protonemedia)
 - [All Contributors](../../contributors)
+- [Alfonso Rodríguez](https://github.com/PonchRobles)
 
 ## License
 
