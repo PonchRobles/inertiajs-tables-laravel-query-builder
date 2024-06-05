@@ -8,6 +8,7 @@ const translationsObject = {
         results: "results",
         to: "to",
         reset: "Reset",
+        search: "Search...",
     }
 };
 
