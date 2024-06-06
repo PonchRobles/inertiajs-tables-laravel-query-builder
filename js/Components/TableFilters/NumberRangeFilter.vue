@@ -149,7 +149,6 @@ export default {
         ui: {
             required: false,
             type: Object,
-            default: {},
         },
     },
     data() {

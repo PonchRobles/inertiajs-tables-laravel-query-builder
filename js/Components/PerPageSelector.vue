@@ -60,7 +60,6 @@ const props = defineProps({
     ui: {
         required: false,
         type: Object,
-        default: {},
     },
 });
 
