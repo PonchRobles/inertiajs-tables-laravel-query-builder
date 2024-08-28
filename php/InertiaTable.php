@@ -7,10 +7,11 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Inertia\Response;
+use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\CustomFilter;
 use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\Filter;
 use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\Filterable;
-use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\ToggleFilter;
 use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\NumberRangeFilter;
+use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\ToggleFilter;
 
 class InertiaTable
 {
