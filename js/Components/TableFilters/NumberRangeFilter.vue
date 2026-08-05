@@ -20,7 +20,7 @@
         >
           <div class="z-40">
             <div
-              ref="popover_min"
+              ref="popoverMin"
               class="relative shadow-md"
             >
               <div
@@ -55,7 +55,7 @@
         >
           <div class="z-40">
             <div
-              ref="popover_max"
+              ref="popoverMax"
               class="relative shadow-md"
             >
               <div
@@ -105,231 +105,160 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted, inject } from "vue";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../../helpers.js";
 
-export default {
-    name: "SimpleMultiRange",
-    inject: ["themeVariables"],
-    props: {
-        max: {
-            required: true,
-            type: Number,
-        },
-        modelValue: {
-            required: true,
-            type: Array,
-        },
-        min: {
-            required: false,
-            type: Number,
-            default: 0,
-        },
-        prefix: {
-            required: false,
-            type: String,
-            default: "",
-        },
-        suffix: {
-            required: false,
-            type: String,
-            default: "",
-        },
-        step: {
-            required: false,
-            type: Number,
-            default: 1,
-        },
-        color: {
-            required: false,
-            type: String,
-            default: "primary",
-        },
-        ui: {
-            required: false,
-            type: Object,
-        },
-    },
-    data() {
-        return {
-            rangePositions: null,
-            moveMin: false,
-            moveMax: false,
-            hasOverlap: false,
-            internalValue: this.modelValue ? [...this.modelValue] : null,
-            fallbackTheme: null,
-        };
-    },
-    computed: {
-        currentMinValue() {
-            try {
-                if (Array.isArray(this.internalValue) && this.internalValue.length === 2) {
-                    let val = Number(Math.min(...this.internalValue));
-                    if (Number.isNaN(val)) {
-                        throw true;
-                    } else {
-                        return this.checkedValue(val);
-                    }
-                } else {
-                    throw true;
-                }
-            } catch (error) {
-                console.error("Malformed model value. You need to have an array of 2 number");
-                return Number(this.min);
-            }
-        },
-        currentMaxValue() {
-            try {
-                if (Array.isArray(this.internalValue) && this.internalValue.length === 2) {
-                    let val = Number(Math.max(...this.internalValue));
-                    if (Number.isNaN(val)) {
-                        throw true;
-                    } else {
-                        return this.checkedValue(val);
-                    }
-                } else {
-                    throw true;
-                }
-            } catch (error) {
-                console.error("Malformed model value. You need to have an array of 2 number");
-                return Number(this.max);
-            }
-        },
-        currentMinValueInPercent() {
-            return (this.currentMinValue - Number(this.min)) / (Number(this.max) - Number(this.min)) * 100;
-        },
-        currentMaxValueInPercent() {
-            return (this.currentMaxValue - Number(this.min)) / (Number(this.max) - Number(this.min)) * 100;
-        },
-        rangeWidth() {
-            return this.currentMaxValueInPercent - this.currentMinValueInPercent;
-        },
-        displayFirstDown() {
-            return ((this.currentMinValueInPercent + this.currentMaxValueInPercent) / 2) > 50;
-        },
-    },
-    watch: {
-        internalValue() {
-            this.detectIfOverlap();
-        },
-    },
-    mounted() {
-        this.detectIfOverlap();
-    },
-    beforeMount() {
-        this.fallbackTheme = {
-            main_bar: {
-                base: "h-2 rounded-full",
-                color: {
-                    primary: "bg-gray-200",
-                    dootix: "bg-gray-200",
-                },
-            },
-            selected_bar: {
-                base: "h-2 rounded-full",
-                color: {
-                    primary: "bg-indigo-600",
-                    dootix: "bg-gradient-to-r from-cyan-500 to-blue-600",
-                },
-            },
-            button: {
-                base: "h-4 w-4 rounded-full shadow border",
-                color: {
-                    primary: "bg-white border-gray-300",
-                    dootix: "bg-white border-gray-300",
-                },
-            },
-            popover: {
-                base: "truncate text-xs rounded py-1 px-4",
-                color: {
-                    primary: "bg-gray-600 text-white",
-                    dootix: "bg-gray-600 text-white",
-                },
-            },
-            popover_arrow: {
-                color: {
-                    primary: "text-gray-600",
-                    dootix: "text-gray-600",
-                },
-            },
-            text: {
-                color: {
-                    primary: "text-gray-700",
-                    dootix: "text-gray-700",
-                },
-            },
-        };
-    },
-    methods: {
-        getMarginTop(isDown) {
-            const buttonTheme = this.getTheme("button");
-            const regex = /h-(\d+)/;
-            const match = buttonTheme.match(regex);
-            const defaultNumber = 4;
-            let number = null;
+const emit = defineEmits(["update:modelValue"]);
 
-            if (match && 1 in match) {
-                number = match[1];
-            } else {
-                number = defaultNumber;
-            }
-            if (isDown) {
-                return `margin-top: ${((number - defaultNumber) + 12) * 0.25}rem`;
-            }
-            return `margin-top: -${(((number - defaultNumber) / 2) + 9) * 0.25}rem`;
-        },
-        checkedValue(value) {
-            if (value < Number(this.min)) {
-                console.warn("SimpleMultiRange: Your value need to be gte than your min range");
-                return Number(this.min);
-            } else if (value > Number(this.max)) {
-                console.warn("SimpleMultiRange: Your value need to be lte than your max range");
-                return Number(this.max);
-            }
-            return value;
-        },
-        detectIfOverlap() {
-            let popoverMin = this.$refs.popover_min.getClientRects()[0];
-            let popoverMax = this.$refs.popover_max.getClientRects()[0];
-            if (popoverMin && popoverMax) {
-                this.hasOverlap = popoverMin.right > popoverMax.left;
-            }
-        },
-        handleMouseDown(event, moveMin) {
-            this.moveMin = moveMin;
-            this.moveMax = !moveMin;
-            this.rangePositions = this.$refs.range.getClientRects()[0];
-            window.addEventListener("mousemove", this.handleMouseMove);
-            window.addEventListener("mouseup", this.handleMouseUp);
-        },
-        handleMouseMove(event) {
-            let posX = event.clientX - this.rangePositions.x;
-            let posInPercent = (posX / this.rangePositions.width * 100);
-            let value = (posInPercent / 100) * (Number(this.max) - Number(this.min)) + Number(this.min);
-            let roundedValue = Number(Math.round(value / this.step) * this.step).toFixed(2);
-            if (roundedValue >= this.min && roundedValue <= this.max) {
-                if (this.moveMin && roundedValue !== this.currentMinValue && roundedValue <= this.currentMaxValue) {
-                    this.internalValue = [roundedValue, this.currentMaxValue];
-                }
-                if (this.moveMax && roundedValue !== this.currentMaxValue && roundedValue >= this.currentMinValue) {
-                    this.internalValue = [this.currentMinValue, roundedValue];
-                }
-            }
-            this.detectIfOverlap();
-        },
-        handleMouseUp(event) {
-            this.moveMin = this.moveMax = false;
-            window.removeEventListener("mousemove", this.handleMouseMove);
-            window.removeEventListener("mouseup", this.handleMouseUp);
-            this.$emit("update:modelValue", [this.currentMinValue, this.currentMaxValue]);
-        },
-        getTheme(item) {
-            return twMerge(
-                get_theme_part([item, "base"], this.fallbackTheme, this.themeVariables?.inertia_table?.table_filter?.number_range_filter, this.ui),
-                get_theme_part([item, "color", this.color], this.fallbackTheme, this.themeVariables?.inertia_table?.table_filter?.number_range_filter, this.ui),
-            );
-        },
+const props = defineProps({
+    max: { type: Number, required: true },
+    modelValue: { type: Array, required: true },
+    min: { type: Number, default: 0 },
+    prefix: { type: String, default: "" },
+    suffix: { type: String, default: "" },
+    step: { type: Number, default: 1 },
+    color: { type: String, default: "primary" },
+    ui: { type: Object, default: undefined },
+});
+
+const range = ref(null);
+const popoverMin = ref(null);
+const popoverMax = ref(null);
+const rangePositions = ref(null);
+const moveMin = ref(false);
+const moveMax = ref(false);
+const hasOverlap = ref(false);
+const internalValue = ref(props.modelValue ? [...props.modelValue] : null);
+
+function checkedValue(value) {
+    if (value < Number(props.min)) return Number(props.min);
+    if (value > Number(props.max)) return Number(props.max);
+    return value;
+}
+
+const currentMinValue = computed(() => {
+    if (Array.isArray(internalValue.value) && internalValue.value.length === 2) {
+        const val = Number(Math.min(...internalValue.value));
+        if (!Number.isNaN(val)) return checkedValue(val);
+    }
+    return Number(props.min);
+});
+
+const currentMaxValue = computed(() => {
+    if (Array.isArray(internalValue.value) && internalValue.value.length === 2) {
+        const val = Number(Math.max(...internalValue.value));
+        if (!Number.isNaN(val)) return checkedValue(val);
+    }
+    return Number(props.max);
+});
+
+const currentMinValueInPercent = computed(() => {
+    return (currentMinValue.value - Number(props.min)) / (Number(props.max) - Number(props.min)) * 100;
+});
+
+const currentMaxValueInPercent = computed(() => {
+    return (currentMaxValue.value - Number(props.min)) / (Number(props.max) - Number(props.min)) * 100;
+});
+
+const rangeWidth = computed(() => {
+    return currentMaxValueInPercent.value - currentMinValueInPercent.value;
+});
+
+const displayFirstDown = computed(() => {
+    return ((currentMinValueInPercent.value + currentMaxValueInPercent.value) / 2) > 50;
+});
+
+function detectIfOverlap() {
+    const pMin = popoverMin.value?.getClientRects()[0];
+    const pMax = popoverMax.value?.getClientRects()[0];
+    if (pMin && pMax) {
+        hasOverlap.value = pMin.right > pMax.left;
+    }
+}
+
+function getMarginTop(isDown) {
+    const buttonTheme = getTheme("button");
+    const match = buttonTheme.match(/h-(\d+)/);
+    const defaultNumber = 4;
+    const number = match?.[1] ? Number(match[1]) : defaultNumber;
+
+    if (isDown) {
+        return `margin-top: ${((number - defaultNumber) + 12) * 0.25}rem`;
+    }
+    return `margin-top: -${(((number - defaultNumber) / 2) + 9) * 0.25}rem`;
+}
+
+function handleMouseDown(event, isMin) {
+    moveMin.value = isMin;
+    moveMax.value = !isMin;
+    rangePositions.value = range.value.getClientRects()[0];
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+}
+
+function handleMouseMove(event) {
+    const posX = event.clientX - rangePositions.value.x;
+    const posInPercent = (posX / rangePositions.value.width * 100);
+    const value = (posInPercent / 100) * (Number(props.max) - Number(props.min)) + Number(props.min);
+    const roundedValue = Number(Math.round(value / props.step) * props.step).toFixed(2);
+    if (roundedValue >= props.min && roundedValue <= props.max) {
+        if (moveMin.value && roundedValue !== currentMinValue.value && roundedValue <= currentMaxValue.value) {
+            internalValue.value = [roundedValue, currentMaxValue.value];
+        }
+        if (moveMax.value && roundedValue !== currentMaxValue.value && roundedValue >= currentMinValue.value) {
+            internalValue.value = [currentMinValue.value, roundedValue];
+        }
+    }
+    detectIfOverlap();
+}
+
+function handleMouseUp() {
+    moveMin.value = moveMax.value = false;
+    window.removeEventListener("mousemove", handleMouseMove);
+    window.removeEventListener("mouseup", handleMouseUp);
+    emit("update:modelValue", [currentMinValue.value, currentMaxValue.value]);
+}
+
+watch(internalValue, () => {
+    detectIfOverlap();
+});
+
+onMounted(() => {
+    detectIfOverlap();
+});
+
+// Theme
+const fallbackTheme = {
+    main_bar: {
+        base: "h-2 rounded-full",
+        color: { primary: "bg-gray-200", dootix: "bg-gray-200" },
     },
+    selected_bar: {
+        base: "h-2 rounded-full",
+        color: { primary: "bg-indigo-600", dootix: "bg-gradient-to-r from-cyan-500 to-blue-600" },
+    },
+    button: {
+        base: "h-4 w-4 rounded-full shadow border",
+        color: { primary: "bg-white border-gray-300", dootix: "bg-white border-gray-300" },
+    },
+    popover: {
+        base: "truncate text-xs rounded py-1 px-4",
+        color: { primary: "bg-gray-600 text-white", dootix: "bg-gray-600 text-white" },
+    },
+    popover_arrow: {
+        color: { primary: "text-gray-600", dootix: "text-gray-600" },
+    },
+    text: {
+        color: { primary: "text-gray-700", dootix: "text-gray-700" },
+    },
+};
+const themeVariables = inject("themeVariables");
+const getTheme = (item) => {
+    return twMerge(
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.table_filter?.number_range_filter, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.table_filter?.number_range_filter, props.ui),
+    );
 };
 </script>

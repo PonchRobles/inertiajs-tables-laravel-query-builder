@@ -1,28 +1,30 @@
 <?php
 
-namespace ProtoneMedia\LaravelQueryBuilderInertiaJs;
+namespace PonchRobles\InertiaTable;
 
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Inertia\Response;
-use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\CustomFilter;
-use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\Filter;
-use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\Filterable;
-use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\NumberRangeFilter;
-use ProtoneMedia\LaravelQueryBuilderInertiaJs\Filters\ToggleFilter;
+use PonchRobles\InertiaTable\Filters\DateRangeFilter;
+use PonchRobles\InertiaTable\Filters\Filter;
+use PonchRobles\InertiaTable\Filters\Filterable;
+use PonchRobles\InertiaTable\Filters\MultiSelectFilter;
+use PonchRobles\InertiaTable\Filters\NumberRangeFilter;
+use PonchRobles\InertiaTable\Filters\ToggleFilter;
 
 class InertiaTable
 {
-    private string $name          = 'default';
-    private string $pageName      = 'page';
+    private string $name = 'default';
+    private string $pageName = 'page';
     private array $perPageOptions = [15, 30, 50, 100];
+    private string $defaultSort = '';
+
     private Request $request;
     private Collection $columns;
     private Collection $searchInputs;
     private Collection $filters;
-    private string $defaultSort = '';
 
     private static bool|string $defaultGlobalSearch = false;
     private static array $defaultQueryBuilderConfig = [];
@@ -41,23 +43,25 @@ class InertiaTable
 
     /**
      * Set a default for global search.
-     *
-     * @param bool|string $label
-     * @return void
      */
-    public static function defaultGlobalSearch(bool|string $label = 'Search...')
+    public static function defaultGlobalSearch(bool|string $label = 'Search...'): void
     {
         static::$defaultGlobalSearch = $label !== false ? __($label) : false;
     }
 
     /**
-     * Retrieve a query string item from the request.
-     *
-     * @param string $key
-     * @param mixed|null $default
-     * @return mixed
+     * Reset the default global search (useful for testing).
      */
-    private function query(string $key, $default = null)
+    public static function resetDefaults(): void
+    {
+        static::$defaultGlobalSearch = false;
+        static::$defaultQueryBuilderConfig = [];
+    }
+
+    /**
+     * Retrieve a query string item from the request.
+     */
+    private function query(string $key, mixed $default = null): mixed
     {
         return $this->request->query(
             $this->name === 'default' ? $key : "{$this->name}_{$key}",
@@ -67,11 +71,8 @@ class InertiaTable
 
     /**
      * Helper method to update the Spatie Query Builder parameter config.
-     *
-     * @param string $name
-     * @return void
      */
-    public static function updateQueryBuilderParameters(string $name)
+    public static function updateQueryBuilderParameters(string $name): void
     {
         if (empty(static::$defaultQueryBuilderConfig)) {
             static::$defaultQueryBuilderConfig = config('query-builder.parameters');
@@ -86,9 +87,6 @@ class InertiaTable
 
     /**
      * Name for this table.
-     *
-     * @param string $name
-     * @return self
      */
     public function name(string $name): self
     {
@@ -99,9 +97,6 @@ class InertiaTable
 
     /**
      * Page name for this table.
-     *
-     * @param string $pageName
-     * @return self
      */
     public function pageName(string $pageName): self
     {
@@ -112,9 +107,6 @@ class InertiaTable
 
     /**
      * Per Page options for this table.
-     *
-     * @param array $pageName
-     * @return self
      */
     public function perPageOptions(array $perPageOptions): self
     {
@@ -125,9 +117,6 @@ class InertiaTable
 
     /**
      * Default sort for this table.
-     *
-     * @param string $defaultSort
-     * @return self
      */
     public function defaultSort(string $defaultSort): self
     {
@@ -137,10 +126,7 @@ class InertiaTable
     }
 
     /**
-     * Collects all properties and sets the default
-     * values from the request query.
-     *
-     * @return array
+     * Collects all properties and sets the default values from the request query.
      */
     protected function getQueryBuilderProps(): array
     {
@@ -152,7 +138,7 @@ class InertiaTable
 
             'filters'           => $this->transformFilters(),
             'hasFilters'        => $this->filters->isNotEmpty(),
-            'hasEnabledFilters' => $this->filters->whereNotNull('value')->isNotEmpty(),
+            'hasEnabledFilters' => $this->filters->filter(fn (Filterable $f) => $f->getValue() !== null)->isNotEmpty(),
 
             'searchInputs'                => $searchInputs              = $this->transformSearchInputs(),
             'searchInputsWithoutGlobal'   => $searchInputsWithoutGlobal = $searchInputs->where('key', '!=', 'global'),
@@ -173,20 +159,17 @@ class InertiaTable
 
     /**
      * Transform the columns collection so it can be used in the Inertia front-end.
-     *
-     * @return \Illuminate\Support\Collection
      */
     protected function transformColumns(): Collection
     {
         $columns = $this->query('columns', []);
-
         $sort = $this->query('sort', $this->defaultSort);
 
         return $this->columns->map(function (Column $column) use ($columns, $sort) {
             $key = $column->key;
 
-            if (!empty($columns)) {
-                $column->hidden = !in_array($key, $columns);
+            if (! empty($columns)) {
+                $column->hidden = ! in_array($key, $columns);
             }
 
             if ($sort === $key) {
@@ -200,29 +183,33 @@ class InertiaTable
     }
 
     /**
-     * Transform the search collection so it can be used in the Inertia front-end.
-     *
-     * @return \Illuminate\Support\Collection
+     * Transform the filters collection so it can be used in the Inertia front-end.
      */
     protected function transformFilters(): Collection
     {
-        $filters = $this->filters;
-
         $queryFilters = $this->query('filter', []);
 
         if (empty($queryFilters)) {
-            return $filters;
+            return $this->filters;
         }
 
-        return $filters->map(function (Filterable $filter) use ($queryFilters) {
-            if (array_key_exists($filter->key, $queryFilters)) {
+        return $this->filters->map(function (Filterable $filter) use ($queryFilters) {
+            if (array_key_exists($filter->getKey(), $queryFilters)) {
                 if ($filter instanceof NumberRangeFilter) {
                     $filter->value = [
-                        $queryFilters[$filter->key][0] ?? $filter->min,
-                        $queryFilters[$filter->key][1] ?? $filter->max,
+                        $queryFilters[$filter->getKey()][0] ?? $filter->min,
+                        $queryFilters[$filter->getKey()][1] ?? $filter->max,
                     ];
+                } elseif ($filter instanceof DateRangeFilter) {
+                    $filterValue = (array) $queryFilters[$filter->getKey()];
+                    $filter->setValue([
+                        $filterValue[0] ?? null,
+                        $filterValue[1] ?? null,
+                    ]);
+                } elseif ($filter instanceof MultiSelectFilter) {
+                    $filter->setValue((array) $queryFilters[$filter->getKey()]);
                 } else {
-                    $filter->value = $queryFilters[$filter->key];
+                    $filter->setValue($queryFilters[$filter->getKey()]);
                 }
             }
 
@@ -231,9 +218,7 @@ class InertiaTable
     }
 
     /**
-     * Transform the filters collection so it can be used in the Inertia front-end.
-     *
-     * @return \Illuminate\Support\Collection
+     * Transform the search inputs collection so it can be used in the Inertia front-end.
      */
     protected function transformSearchInputs(): Collection
     {
@@ -254,17 +239,15 @@ class InertiaTable
 
     /**
      * Add a column to the query builder.
-     *
-     * @param string|null $key
-     * @param string|null $label
-     * @param bool $canBeHidden
-     * @param bool $hidden
-     * @param bool $sortable
-     * @param bool $searchable
-     * @return self
      */
-    public function column(string $key = null, string $label = null, bool $canBeHidden = true, bool $hidden = false, bool $sortable = false, bool $searchable = false): self
-    {
+    public function column(
+        ?string $key = null,
+        ?string $label = null,
+        bool $canBeHidden = true,
+        bool $hidden = false,
+        bool $sortable = false,
+        bool $searchable = false,
+    ): self {
         $key   = $key ?: Str::kebab($label);
         $label = $label ?: Str::headline($key);
 
@@ -276,7 +259,7 @@ class InertiaTable
             canBeHidden: $canBeHidden,
             hidden: $hidden,
             sortable: $sortable,
-            sorted: false
+            sorted: false,
         ))->values();
 
         if ($searchable) {
@@ -288,31 +271,23 @@ class InertiaTable
 
     /**
      * Helper method to add a global search input.
-     *
-     * @param string|null $label
-     * @return self
      */
-    public function withGlobalSearch(string $label = null): self
+    public function withGlobalSearch(?string $label = null): self
     {
         return $this->searchInput('global', $label ?: __('Search...'));
     }
 
     /**
      * Add a search input to query builder.
-     *
-     * @param string $key
-     * @param string|null $label
-     * @param string|null $defaultValue
-     * @return self
      */
-    public function searchInput(string $key, string $label = null, string $defaultValue = null): self
+    public function searchInput(string $key, ?string $label = null, ?string $defaultValue = null): self
     {
         $this->searchInputs = $this->searchInputs->reject(function (SearchInput $searchInput) use ($key) {
             return $searchInput->key === $key;
         })->push(new SearchInput(
             key: $key,
             label: $label ?: Str::headline($key),
-            value: $defaultValue
+            value: $defaultValue,
         ))->values();
 
         return $this;
@@ -320,19 +295,17 @@ class InertiaTable
 
     /**
      * Add a select filter to the query builder.
-     *
-     * @param string $key
-     * @param array $options
-     * @param string|null $label
-     * @param string|null $defaultValue
-     * @param bool $noFilterOption
-     * @param string|null $noFilterOptionLabel
-     * @return self
      */
-    public function selectFilter(string $key, array $options, string $label = null, string $defaultValue = null, bool $noFilterOption = true, string $noFilterOptionLabel = null): self
-    {
+    public function selectFilter(
+        string $key,
+        array $options,
+        ?string $label = null,
+        ?string $defaultValue = null,
+        bool $noFilterOption = true,
+        ?string $noFilterOptionLabel = null,
+    ): self {
         $this->filters = $this->filters->reject(function (Filterable $filter) use ($key) {
-            return $filter->key === $key;
+            return $filter->getKey() === $key;
         })->push(new Filter(
             key: $key,
             label: $label ?: Str::headline($key),
@@ -340,7 +313,7 @@ class InertiaTable
             value: $defaultValue,
             noFilterOption: $noFilterOption,
             noFilterOptionLabel: $noFilterOptionLabel ?: '-',
-            type: 'select'
+            type: 'select',
         ))->values();
 
         return $this;
@@ -348,16 +321,11 @@ class InertiaTable
 
     /**
      * Add a toggle filter to the query builder.
-     *
-     * @param string $key
-     * @param string|null $label
-     * @param bool|null $defaultValue
-     * @return self
      */
-    public function toggleFilter(string $key, string $label = null, bool $defaultValue = null): self
+    public function toggleFilter(string $key, ?string $label = null, ?bool $defaultValue = null): self
     {
         $this->filters = $this->filters->reject(function (Filterable $filter) use ($key) {
-            return $filter->key === $key;
+            return $filter->getKey() === $key;
         })->push(new ToggleFilter(
             key: $key,
             label: $label ?: Str::headline($key),
@@ -369,16 +337,19 @@ class InertiaTable
 
     /**
      * Add a number range filter to the query builder.
-     *
-     * @param string $key
-     * @param string|null $label
-     * @param bool|null $defaultValue
-     * @return self
      */
-    public function numberRangeFilter(string $key, float $max, float $min = 0, string $prefix = '', string $suffix = '', float $step = 1, string $label = null, bool $defaultValue = null): self
-    {
+    public function numberRangeFilter(
+        string $key,
+        float $max,
+        float $min = 0,
+        string $prefix = '',
+        string $suffix = '',
+        float $step = 1,
+        ?string $label = null,
+        ?array $defaultValue = null,
+    ): self {
         $this->filters = $this->filters->reject(function (Filterable $filter) use ($key) {
-            //return $filter->key === $key;
+            return $filter->getKey() === $key;
         })->push(new NumberRangeFilter(
             key: $key,
             label: $label ?: Str::headline($key),
@@ -394,10 +365,57 @@ class InertiaTable
     }
 
     /**
+     * Add a date range filter to the query builder.
+     */
+    public function dateRangeFilter(
+        string $key,
+        ?string $label = null,
+        ?array $defaultValue = null,
+        ?string $minDate = null,
+        ?string $maxDate = null,
+        string $format = 'Y-m-d',
+    ): self {
+        $this->filters = $this->filters->reject(function (Filterable $filter) use ($key) {
+            return $filter->getKey() === $key;
+        })->push(new DateRangeFilter(
+            key: $key,
+            label: $label ?: Str::headline($key),
+            value: $defaultValue,
+            minDate: $minDate,
+            maxDate: $maxDate,
+            format: $format,
+        ))->values();
+
+        return $this;
+    }
+
+    /**
+     * Add a multi-select filter to the query builder.
+     */
+    public function multiSelectFilter(
+        string $key,
+        array $options,
+        ?string $label = null,
+        ?array $defaultValue = null,
+        bool $noFilterOption = true,
+        ?string $noFilterOptionLabel = null,
+    ): self {
+        $this->filters = $this->filters->reject(function (Filterable $filter) use ($key) {
+            return $filter->getKey() === $key;
+        })->push(new MultiSelectFilter(
+            key: $key,
+            label: $label ?: Str::headline($key),
+            options: $options,
+            value: $defaultValue,
+            noFilterOption: $noFilterOption,
+            noFilterOptionLabel: $noFilterOptionLabel ?: '-',
+        ))->values();
+
+        return $this;
+    }
+
+    /**
      * Give the query builder props to the given Inertia response.
-     *
-     * @param \Inertia\Response $response
-     * @return \Inertia\Response
      */
     public function applyTo(Response $response): Response
     {

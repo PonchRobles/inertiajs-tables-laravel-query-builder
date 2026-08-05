@@ -136,8 +136,8 @@
       >
         <TableWrapper :class="{ 'mt-3': !hasOnlyData }">
           <slot name="table">
-            <table class="min-w-full divide-y divide-gray-300">
-              <thead class="bg-gray-50">
+            <table :class="getTheme('table')">
+              <thead :class="getTheme('thead')">
                 <slot
                   name="head"
                   :show="show"
@@ -149,6 +149,7 @@
                       v-for="column in queryBuilderProps.columns"
                       :key="`table-${name}-header-${column.key}`"
                       :cell="header(column.key)"
+                      :color="color"
                     >
                       <template #label>
                         <slot
@@ -161,7 +162,7 @@
                   </tr>
                 </slot>
               </thead>
-              <tbody class="divide-y divide-gray-200 bg-white">
+              <tbody :class="getTheme('tbody')">
                 <slot
                   name="body"
                   :show="show"
@@ -169,25 +170,34 @@
                   <tr
                     v-for="(item, key) in resourceData"
                     :key="`table-${name}-row-${key}`"
-                    class=""
-                    :class="{
-                      'bg-gray-50': striped && key % 2,
-                      'hover:bg-gray-100': striped,
-                      'hover:bg-gray-50': !striped
-                    }"
+                    :class="[
+                      striped && key % 2 ? getTheme('tr_striped') : '',
+                      striped ? getTheme('tr_hover_striped') : getTheme('tr_hover'),
+                    ]"
                     @click="rowClicked($event, item, key)"
                   >
                     <td
                       v-for="column in queryBuilderProps.columns"
                       v-show="show(column.key)"
                       :key="`table-${name}-row-${key}-column-${column.key}`"
-                      class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                      :class="getTheme('td')"
                     >
                       <slot
                         :name="`cell(${column.key})`"
                         :item="item"
                       >
                         {{ item[column.key] }}
+                      </slot>
+                    </td>
+                  </tr>
+
+                  <tr v-if="!hasData">
+                    <td
+                      :colspan="queryBuilderProps.columns?.length || 1"
+                      :class="getTheme('td_empty')"
+                    >
+                      <slot name="empty">
+                        {{ translations.no_results_found }}
                       </slot>
                     </td>
                   </tr>
@@ -229,193 +239,109 @@ import TableGlobalSearch from "./TableGlobalSearch.vue";
 import TableSearchRows from "./TableSearchRows.vue";
 import TableReset from "./TableReset.vue";
 import TableWrapper from "./TableWrapper.vue";
-import { computed, onMounted, ref, watch, onUnmounted, getCurrentInstance, Transition } from "vue";
-import qs from "qs";
-import clone from "lodash-es/clone";
-import filter from "lodash-es/filter";
-import findKey from "lodash-es/findKey";
-import forEach from "lodash-es/forEach";
-import isEqual from "lodash-es/isEqual";
-import map from "lodash-es/map";
-import pickBy from "lodash-es/pickBy";
-import { router, usePage } from "@inertiajs/vue3";
 import GroupedActions from "./GroupedActions.vue";
+import { computed, ref, watch, inject, Transition } from "vue";
+import { usePage } from "@inertiajs/vue3";
+import { getTranslations } from "../translations.js";
+import { twMerge } from "tailwind-merge";
+import { get_theme_part } from "../helpers.js";
+import { useTableQuery } from "../composables/useTableQuery.js";
+import { useTableNavigation } from "../composables/useTableNavigation.js";
+import { useTableState } from "../composables/useTableState.js";
 
+const translations = getTranslations();
 const emit = defineEmits(["rowClicked"]);
 
 const props = defineProps({
-    inertia: {
-        type: Object,
-        default: () => {
-            return {};
-        },
-        required: false,
-    },
-
-    name: {
-        type: String,
-        default: "default",
-        required: false,
-    },
-
-    striped: {
-        type: Boolean,
-        default: false,
-        required: false,
-    },
-
-    preventOverlappingRequests: {
-        type: Boolean,
-        default: true,
-        required: false,
-    },
-
-    inputDebounceMs: {
-        type: Number,
-        default: 350,
-        required: false,
-    },
-
-    preserveScroll: {
-        type: [Boolean, String],
-        default: false,
-        required: false,
-    },
-
-    resource: {
-        type: Object,
-        default: () => {
-            return {};
-        },
-        required: false,
-    },
-
-    meta: {
-        type: Object,
-        default: () => {
-            return {};
-        },
-        required: false,
-    },
-
-    data: {
-        type: Object,
-        default: () => {
-            return {};
-        },
-        required: false,
-    },
-
-    withGroupedMenu: {
-        type: Boolean,
-        default: false,
-        required: false,
-    },
-
-    color: {
-        type: String,
-        default: "primary",
-        required: false,
-    },
+    inertia: { type: Object, default: () => ({}) },
+    name: { type: String, default: "default" },
+    striped: { type: Boolean, default: false },
+    preventOverlappingRequests: { type: Boolean, default: true },
+    inputDebounceMs: { type: Number, default: 350 },
+    preserveScroll: { type: [Boolean, String], default: false },
+    resource: { type: Object, default: () => ({}) },
+    meta: { type: Object, default: () => ({}) },
+    data: { type: Object, default: () => ({}) },
+    withGroupedMenu: { type: Boolean, default: false },
+    color: { type: String, default: "primary" },
+    ui: { type: Object, default: undefined },
 });
 
-const app = getCurrentInstance();
-
 const updates = ref(0);
+const tableFieldset = ref(null);
+const forcedVisibleSearchInputs = ref([]);
+
+const tableName = computed(() => props.name);
+const inputDebounceMs = computed(() => props.inputDebounceMs);
+const preventOverlappingRequests = computed(() => props.preventOverlappingRequests);
 
 const queryBuilderProps = computed(() => {
-    let data = usePage().props.queryBuilderProps
-        ? { ...usePage().props.queryBuilderProps[props.name] } || {}
-        : {};
-
+    const page = usePage();
+    const pageProps = page?.props?.queryBuilderProps ?? {};
+    const data = { ...(pageProps[props.name] ?? {}) };
     data._updates = updates.value;
-
     return data;
 });
 
 const queryBuilderData = ref(queryBuilderProps.value);
+const pageName = computed(() => queryBuilderProps.value.pageName);
 
-const pageName = computed(() =>{
-    return queryBuilderProps.value.pageName;
-});
+const { canBeReset, resetQuery, generateNewQueryString } = useTableQuery(
+    queryBuilderData, queryBuilderProps, tableName, pageName, forcedVisibleSearchInputs
+);
 
-const forcedVisibleSearchInputs = ref([]);
+const { isVisiting, visitCancelToken, visitPageFromUrl, visitFromQueryString } = useTableNavigation(
+    props, tableFieldset, updates, queryBuilderData, pageName, generateNewQueryString
+);
 
-const tableFieldset = ref(null);
+const {
+    changeSearchInputValue, changeGlobalSearchValue, changeFilterValue,
+    onPerPageChange, changeColumnStatus, disableSearchInput, showSearchInput,
+    sortBy, show, header,
+} = useTableState(
+    queryBuilderData, queryBuilderProps, inputDebounceMs,
+    forcedVisibleSearchInputs, visitCancelToken, preventOverlappingRequests
+);
 
 const hasOnlyData = computed(() => {
-    if(queryBuilderProps.value.hasToggleableColumns) {
-        return false;
-    }
-
-    if(queryBuilderProps.value.hasFilters) {
-        return false;
-    }
-
-    if(queryBuilderProps.value.hasSearchInputs) {
-        return false;
-    }
-
-    if(queryBuilderProps.value.globalSearch) {
-        return false;
-    }
-
-    return true;
-
+    return !queryBuilderProps.value.hasToggleableColumns
+        && !queryBuilderProps.value.hasFilters
+        && !queryBuilderProps.value.hasSearchInputs
+        && !queryBuilderProps.value.globalSearch;
 });
 
 const resourceData = computed(() => {
-    if(Object.keys(props.resource).length === 0){
-        return props.data;
-    }
-
-    if("data" in props.resource) {
-        return props.resource.data;
-    }
-
+    if (Object.keys(props.resource).length === 0) return props.data;
+    if ("data" in props.resource) return props.resource.data;
     return props.resource;
 });
 
 const resourceMeta = computed(() => {
-    if(Object.keys(props.resource).length === 0){
-        return props.meta;
-    }
-
-    if("links" in props.resource && "meta" in props.resource) {
-        if(Object.keys(props.resource.links).length === 4
-          && "next" in props.resource.links
-          && "prev" in props.resource.links) {
+    if (Object.keys(props.resource).length === 0) return props.meta;
+    if ("links" in props.resource && "meta" in props.resource) {
+        if (
+            Object.keys(props.resource.links).length === 4
+            && "next" in props.resource.links
+        ) {
             return {
                 ...props.resource.meta,
                 next_page_url: props.resource.links.next,
-                prev_page_url: props.resource.links.prev
+                prev_page_url: props.resource.links.prev,
             };
         }
     }
-
-    if("meta" in props.resource) {
-        return props.resource.meta;
-    }
-
+    if ("meta" in props.resource) return props.resource.meta;
     return props.resource;
 });
 
 const hasData = computed(() => {
-    if(resourceData.value.length > 0){
-        return true;
-    }
-
-    if(resourceMeta.value.total > 0) {
-        return true;
-    }
-
+    if (Array.isArray(resourceData.value) && resourceData.value.length > 0) return true;
+    if (resourceMeta.value?.total > 0) return true;
     return false;
 });
 
 const defaultActions = ref({
-    reset: {
-        onClick: resetQuery,
-    },
+    reset: { onClick: resetQuery },
     toggleColumns: {
         show: queryBuilderProps.value.hasToggleableColumns,
         columns: queryBuilderProps.value.columns,
@@ -429,333 +355,30 @@ const defaultActions = ref({
     },
 });
 
-function disableSearchInput(key) {
-    forcedVisibleSearchInputs.value = forcedVisibleSearchInputs.value.filter((search) => search != key);
-
-    changeSearchInputValue(key, null);
-}
-
-function showSearchInput(key) {
-    forcedVisibleSearchInputs.value.push(key);
-}
-
-const canBeReset = computed(() => {
-    if(forcedVisibleSearchInputs.value.length > 0){
-        return true;
-    }
-
-    const queryStringData = qs.parse(location.search.substring(1));
-
-    const page = queryStringData[pageName.value];
-
-    if(page > 1) {
-        return true;
-    }
-
-    const prefix = props.name === "default" ? "" : (props.name + "_");
-    let dirty = false;
-
-    forEach(["filter", "columns", "cursor", "sort"], (key) => {
-        const value = queryStringData[prefix + key];
-
-        if(key === "sort" && value === queryBuilderProps.value.defaultSort) {
-            return;
-        }
-
-        if(value !== undefined) {
-            dirty = true;
-        }
-    });
-
-    return dirty;
-});
-
-function resetQuery() {
-    forcedVisibleSearchInputs.value = [];
-
-    forEach(queryBuilderData.value.filters, (filter, key) => {
-        queryBuilderData.value.filters[key].value = null;
-    });
-
-    forEach(queryBuilderData.value.searchInputs, (filter, key) => {
-        queryBuilderData.value.searchInputs[key].value = null;
-    });
-
-    forEach(queryBuilderData.value.columns, (column, key) => {
-        queryBuilderData.value.columns[key].hidden = column.can_be_hidden
-            ? !queryBuilderProps.value.defaultVisibleToggleableColumns.includes(column.key)
-            : false;
-    });
-
-    queryBuilderData.value.sort = null;
-    queryBuilderData.value.cursor = null;
-    queryBuilderData.value.page = 1;
-}
-
-const debounceTimeouts = {};
-
-function changeSearchInputValue(key, value) {
-    clearTimeout(debounceTimeouts[key]);
-
-    debounceTimeouts[key] = setTimeout(() => {
-        if(visitCancelToken.value && props.preventOverlappingRequests){
-            visitCancelToken.value.cancel();
-        }
-
-        const intKey = findDataKey("searchInputs", key);
-
-        queryBuilderData.value.searchInputs[intKey].value = value;
-        queryBuilderData.value.cursor = null;
-        queryBuilderData.value.page = 1;
-    }, props.inputDebounceMs);
-}
-
-function changeGlobalSearchValue(value) {
-    changeSearchInputValue("global", value);
-}
-
-function changeFilterValue(key, value) {
-    const intKey = findDataKey("filters", key);
-    queryBuilderData.value.filters[intKey].value = value;
-    queryBuilderData.value.cursor = null;
-    queryBuilderData.value.page = 1;
-}
-
-function onPerPageChange(value) {
-    queryBuilderData.value.cursor = null;
-    queryBuilderData.value.perPage = value;
-    queryBuilderData.value.page = 1;
-}
-
-function findDataKey(dataKey, key) {
-    return findKey(queryBuilderData.value[dataKey], (value) => {
-        return value.key == key;
-    });
-}
-
-function changeColumnStatus(key, visible) {
-    const intKey = findDataKey("columns", key);
-
-    queryBuilderData.value.columns[intKey].hidden = !visible;
-}
-
-function getFilterForQuery() {
-    let filtersWithValue = {};
-
-    forEach(queryBuilderData.value.searchInputs, (searchInput) => {
-        if (searchInput.value !== null) {
-            filtersWithValue[searchInput.key] = searchInput.value;
-        }
-    });
-
-    forEach(queryBuilderData.value.filters, (filters) => {
-        let value = filters.value;
-        if (value !== null) {
-            if (filters.type === "number_range" && Number(Math.max(...filters.value)) === Number(filters.max) && Number(Math.min(...filters.value)) === Number(filters.min)) {
-                value = null;
-            }
-            filtersWithValue[filters.key] = value;
-        }
-    });
-
-    return filtersWithValue;
-}
-
-function getColumnsForQuery() {
-    const columns = queryBuilderData.value.columns;
-
-    let visibleColumns = filter(columns, (column) => {
-        return !column.hidden;
-    });
-
-    let visibleColumnKeys = map(visibleColumns, (column) => {
-        return column.key;
-    }).sort();
-
-    if (isEqual(visibleColumnKeys, queryBuilderProps.value.defaultVisibleToggleableColumns)){
-        return {};
-    }
-
-    return visibleColumnKeys;
-}
-
-function dataForNewQueryString() {
-    const filterForQuery = getFilterForQuery();
-    const columnsForQuery = getColumnsForQuery();
-
-    const queryData = {};
-
-    if(Object.keys(filterForQuery).length > 0) {
-        queryData.filter = filterForQuery;
-    }
-
-    if(Object.keys(columnsForQuery).length > 0) {
-        queryData.columns = columnsForQuery;
-    }
-
-    const cursor = queryBuilderData.value.cursor;
-    const page = queryBuilderData.value.page;
-    const sort = queryBuilderData.value.sort;
-    const perPage = queryBuilderData.value.perPage;
-
-    if(cursor) {
-        queryData.cursor = cursor;
-    }
-
-    if(page > 1) {
-        queryData.page = page;
-    }
-
-    if(perPage > 1) {
-        queryData.perPage = perPage;
-    }
-
-
-    if(sort) {
-        queryData.sort = sort;
-    }
-
-    return queryData;
-}
-
-function visitPageFromUrl(url) {
-    if(!url) {
-        return null;
-    }
-
-    const pageName = usePage().props.queryBuilderProps[props.name].pageName ?? "page";
-    const page = new URL(url)?.searchParams?.get(pageName);
-    if(page !== null) {
-        queryBuilderData.value.page = page;
-    } else {
-        visit(url);
-    }
-}
-
-function generateNewQueryString() {
-    const queryStringData = qs.parse(location.search.substring(1));
-
-    const prefix = props.name === "default" ? "" : (props.name + "_");
-
-    forEach(["filter", "columns", "cursor", "sort"], (key) => {
-        delete queryStringData[prefix + key];
-    });
-
-    delete queryStringData[pageName.value];
-
-    forEach(dataForNewQueryString(), (value, key) =>{
-        if(key === "page") {
-            queryStringData[pageName.value] = value;
-        } else if(key === "perPage") {
-            queryStringData.perPage = value;
-        } else {
-            queryStringData[prefix + key] = value;
-        }
-    });
-
-    let query = qs.stringify(queryStringData, {
-        filter(prefix, value) {
-            if (typeof value === "object" && value !== null) {
-                return pickBy(value);
-            }
-
-            return value;
-        },
-
-        skipNulls: true,
-        strictNullHandling: true,
-    });
-
-    if (!query || query === (pageName.value + "=1")) {
-        query = "";
-    }
-
-    return query;
-}
-
-const isVisiting = ref(false);
-const visitCancelToken = ref(null);
-
-function visit(url) {
-    if(!url) {
-        return;
-    }
-
-    router.get(
-        url,
-        {},
-        {
-            replace: true,
-            preserveState: true,
-            preserveScroll: props.preserveScroll !== false,
-            onBefore(){
-                isVisiting.value = true;
-            },
-            onCancelToken(cancelToken) {
-                visitCancelToken.value = cancelToken;
-            },
-            onFinish() {
-                isVisiting.value = false;
-            },
-            onSuccess() {
-                if(props.preserveScroll === "table-top") {
-                    const offset = -8;
-                    const top = tableFieldset.value.getBoundingClientRect().top + window.pageYOffset + offset;
-
-                    window.scrollTo({ top });
-                }
-
-                updates.value++;
-            }
-        }
-    );
-}
-
-function  rowClicked(event, item, key) {
+function rowClicked(event, item, key) {
     emit("rowClicked", event, item, key);
 }
 
 watch(queryBuilderData, () => {
-    visit(location.pathname + "?" +  generateNewQueryString());
+    visitFromQueryString();
 }, { deep: true });
 
-const inertiaListener = () => {
-    updates.value++;
+// Theme
+const fallbackTheme = {
+    table: { base: "min-w-full divide-y divide-gray-300" },
+    thead: { base: "bg-gray-50" },
+    tbody: { base: "divide-y divide-gray-200 bg-white" },
+    tr_striped: { base: "bg-gray-50" },
+    tr_hover: { base: "hover:bg-gray-50" },
+    tr_hover_striped: { base: "hover:bg-gray-100" },
+    td: { base: "whitespace-nowrap px-3 py-4 text-sm text-gray-500" },
+    td_empty: { base: "px-3 py-8 text-sm text-gray-500 text-center" },
 };
-
-onMounted(() => {
-    document.addEventListener("inertia:success", inertiaListener);
-});
-
-onUnmounted(() => {
-    document.removeEventListener("inertia:success", inertiaListener);
-});
-
-//
-
-function sortBy(column) {
-    if(queryBuilderData.value.sort == column) {
-        queryBuilderData.value.sort = `-${column}`;
-    } else {
-        queryBuilderData.value.sort = column;
-    }
-
-    queryBuilderData.value.cursor = null;
-    queryBuilderData.value.page = 1;
-}
-
-function show(key) {
-    const intKey = findDataKey("columns", key);
-
-    return !queryBuilderData.value.columns[intKey].hidden;
-}
-
-function header(key) {
-    const intKey = findDataKey("columns", key);
-    const columnData = clone(queryBuilderProps.value.columns[intKey]);
-
-    columnData.onSort = sortBy;
-
-    return columnData;
-}
+const themeVariables = inject("themeVariables");
+const getTheme = (item) => {
+    return twMerge(
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.table, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.table, props.ui),
+    );
+};
 </script>

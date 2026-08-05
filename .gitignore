@@ -24,12 +24,13 @@ pnpm-debug.log*
 # PHP
 build
 composer.lock
-docs
 vendor
 coverage
 .phpunit.result.cache
-app/public/css/app.css
-app/public/js/app.js
-app/public/mix-manifest.json
+.php-cs-fixer.cache
 
-protonemedia-inertiajs-tables-laravel-query-builder-*.tgz
+# Test project
+/test-app
+
+# Package artifacts
+*.tgz

@@ -28,10 +28,8 @@
 
 <script setup>
 import OnClickOutside from "./OnClickOutside.vue";
-import { createPopper } from "@popperjs/core/lib/popper-lite";
-import preventOverflow from "@popperjs/core/lib/modifiers/preventOverflow";
-import flip from "@popperjs/core/lib/modifiers/flip";
-import { ref, watch, onMounted, inject } from "vue";
+import { computePosition, flip, shift } from "@floating-ui/dom";
+import { ref, watch, onMounted, onBeforeUnmount, inject } from "vue";
 import { get_theme_part } from "../helpers.js";
 import { twMerge } from "tailwind-merge";
 
@@ -75,7 +73,6 @@ const props = defineProps({
 });
 
 const opened = ref(false);
-const popper = ref(null);
 
 function toggle() {
     opened.value = !opened.value;
@@ -85,27 +82,41 @@ function hide() {
     opened.value = false;
 }
 
-watch(opened, () => {
-    popper.value.update();
-    if (!opened.value) {
+const button = ref(null);
+const tooltip = ref(null);
+
+function updatePosition() {
+    if (!button.value || !tooltip.value) return;
+    computePosition(button.value, tooltip.value, {
+        placement: props.placement,
+        middleware: [flip(), shift()],
+    }).then(({ x, y }) => {
+        Object.assign(tooltip.value.style, {
+            left: `${x}px`,
+            top: `${y}px`,
+        });
+    });
+}
+
+watch(opened, (val) => {
+    if (val) {
+        updatePosition();
+    } else {
         emit("closed");
     }
 });
 
-const button = ref(null);
-const tooltip = ref(null);
-
 onMounted(() => {
-    popper.value = createPopper(button.value, tooltip.value, {
-        placement: props.placement,
-        modifiers: [flip, preventOverflow],
-    });
+    updatePosition();
+});
+
+onBeforeUnmount(() => {
+    opened.value = false;
 });
 
 defineExpose({ hide });
 
 // Theme
-const commonClasses = "w-full bg-white border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 border-gray-300";
 const fallbackTheme = {
     button: {
         base: "w-full border rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",

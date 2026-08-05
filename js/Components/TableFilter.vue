@@ -74,6 +74,18 @@
               @update:model-value="updateNumberRangeFilter(filter)"
             />
           </div>
+          <DateRangeFilter
+            v-if="filter.type === 'date_range'"
+            :filter="filter"
+            :on-filter-change="onFilterChange"
+            :color="color"
+          />
+          <MultiSelectFilter
+            v-if="filter.type === 'multi_select'"
+            :filter="filter"
+            :on-filter-change="onFilterChange"
+            :color="color"
+          />
         </div>
       </div>
     </div>
@@ -85,6 +97,8 @@ import ButtonWithDropdown from "./ButtonWithDropdown.vue";
 import { computed, inject, ref } from "vue";
 import ToggleFilter from "./TableFilters/ToggleFilter.vue";
 import NumberRangeFilter from "./TableFilters/NumberRangeFilter.vue";
+import DateRangeFilter from "./TableFilters/DateRangeFilter.vue";
+import MultiSelectFilter from "./TableFilters/MultiSelectFilter.vue";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../helpers.js";
 
@@ -126,11 +140,15 @@ function filterIsNull(filter) {
     if (filter.value === null) return true;
     switch (filter.type) {
     case "number_range":
-        return  Number(Math.max(...filter.value)) === Number(filter.max) && Number(Math.min(...filter.value)) === Number(filter.min);
+        return Number(Math.max(...filter.value)) === Number(filter.max) && Number(Math.min(...filter.value)) === Number(filter.min);
     case "select":
         return filter.value === "";
     case "toggle":
         return false;
+    case "date_range":
+        return !Array.isArray(filter.value) || (!filter.value[0] && !filter.value[1]);
+    case "multi_select":
+        return !Array.isArray(filter.value) || filter.value.length === 0;
     default:
         return !filter.value;
     }

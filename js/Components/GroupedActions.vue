@@ -27,7 +27,7 @@
         <button
           v-if="'searchFields' in actions && actions.searchFields.show"
           dusk="add-search-fields-button"
-          class="text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex gap-2 items-center"
+          :class="getTheme('menu_item')"
           role="menuitem"
           @click="isSearchFieldsDisplayed = true"
         >
@@ -48,7 +48,7 @@
         <button
           v-if="'toggleColumns' in actions && actions.toggleColumns.show"
           dusk="toggle-column-button"
-          class="text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex gap-2 items-center"
+          :class="getTheme('menu_item')"
           role="menuitem"
           @click="isToggleColumnsDisplayed = true"
         >
@@ -71,7 +71,7 @@
         <button
           v-if="'reset' in actions"
           dusk="reset-button"
-          class="text-left w-full px-4 py-2 text-sm text-red-500 hover:bg-gray-100 hover:text-red-700 flex gap-2 items-center"
+          :class="getTheme('reset_button')"
           role="menuitem"
           @click="actions.reset?.onClick"
         >
@@ -94,7 +94,7 @@
       <div v-show="isSearchFieldsDisplayed">
         <button
           type="button"
-          class="text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex gap-2 items-center"
+          :class="getTheme('menu_item')"
           @click="isSearchFieldsDisplayed = false"
         >
           <svg
@@ -117,7 +117,7 @@
           v-for="(searchInput, key) in actions.searchFields.searchInputs"
           :key="key"
           :dusk="`add-search-row-${searchInput.key}`"
-          class="text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+          :class="getTheme('search_item')"
           role="menuitem"
           @click.prevent="actions.searchFields.onClick(searchInput.key)"
         >
@@ -128,7 +128,7 @@
       <div v-show="isToggleColumnsDisplayed">
         <button
           type="button"
-          class="text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex gap-2 items-center"
+          :class="getTheme('menu_item')"
           @click="isToggleColumnsDisplayed = false"
         >
           <svg
@@ -155,35 +155,17 @@
               :key="key"
               class="py-2 flex items-center justify-between"
             >
-              <p
-                class="text-sm text-gray-900"
-              >
+              <p class="text-sm text-gray-900">
                 {{ column.label }}
               </p>
 
-              <button
-                type="button"
-                class="ml-4 relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-blue-500"
-                :class="{
-                  'bg-green-500': !column.hidden,
-                  'bg-gray-200': column.hidden,
-                }"
-                :aria-pressed="!column.hidden"
+              <ToggleSwitch
+                :model-value="!column.hidden"
                 :aria-labelledby="`toggle-column-${column.key}`"
-                :aria-describedby="`toggle-column-${column.key}`"
                 :dusk="`toggle-column-${column.key}`"
-                @click.prevent="actions.toggleColumns.onChange(column.key, column.hidden)"
-              >
-                <span class="sr-only">Column status</span>
-                <span
-                  aria-hidden="true"
-                  :class="{
-                    'translate-x-5': !column.hidden,
-                    'translate-x-0': column.hidden,
-                  }"
-                  class="inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition ease-in-out duration-200"
-                />
-              </button>
+                :color="color"
+                @update:model-value="actions.toggleColumns.onChange(column.key, column.hidden)"
+              />
             </li>
           </ul>
         </div>
@@ -194,22 +176,18 @@
 
 <script setup>
 import ButtonWithDropdown from "./ButtonWithDropdown.vue";
+import ToggleSwitch from "./ToggleSwitch.vue";
 import { getTranslations } from "../translations.js";
-import { ref, watch } from "vue";
+import { ref, inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { get_theme_part } from "../helpers.js";
 
 const translations = getTranslations();
 
 const props = defineProps({
-    actions: {
-        type: Object,
-        required: true,
-    },
-
-    color: {
-        type: String,
-        default: "primary",
-        required: false,
-    },
+    actions: { type: Object, required: true },
+    color: { type: String, default: "primary" },
+    ui: { type: Object, default: undefined },
 });
 
 const isToggleColumnsDisplayed = ref(false);
@@ -218,4 +196,24 @@ const isSearchFieldsDisplayed = ref(false);
 function menuClosed() {
     isToggleColumnsDisplayed.value = isSearchFieldsDisplayed.value = false;
 }
+
+// Theme
+const fallbackTheme = {
+    menu_item: {
+        base: "text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex gap-2 items-center",
+    },
+    search_item: {
+        base: "text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+    },
+    reset_button: {
+        base: "text-left w-full px-4 py-2 text-sm text-red-500 hover:bg-gray-100 hover:text-red-700 flex gap-2 items-center",
+    },
+};
+const themeVariables = inject("themeVariables");
+const getTheme = (item) => {
+    return twMerge(
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.grouped_actions, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.grouped_actions, props.ui),
+    );
+};
 </script>

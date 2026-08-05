@@ -1,6 +1,6 @@
 <?php
 
-namespace ProtoneMedia\LaravelQueryBuilderInertiaJs;
+namespace PonchRobles\InertiaTable;
 
 use Illuminate\Contracts\Support\Arrayable;
 
@@ -13,7 +13,7 @@ class SearchInput implements Arrayable
     ) {
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'key'   => $this->key,
