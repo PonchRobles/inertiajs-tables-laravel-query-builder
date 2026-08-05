@@ -2,13 +2,8 @@
 
 $finder = Symfony\Component\Finder\Finder::create()
     ->in([
-        __DIR__ . '/php',
-        __DIR__ . '/app/app',
-        __DIR__ . '/app/config',
-        __DIR__ . '/app/database',
-        __DIR__ . '/app/lang',
-        __DIR__ . '/app/routes',
-        __DIR__ . '/app/tests',
+        __DIR__ . '/src',
+        __DIR__ . '/tests',
     ])
     ->name('*.php')
     ->ignoreDotFiles(true)
@@ -16,23 +11,18 @@ $finder = Symfony\Component\Finder\Finder::create()
 
 return (new PhpCsFixer\Config())
     ->setRules([
-        '@PHP70Migration'                        => true,
-        '@PHP71Migration'                        => true,
-        '@PHP73Migration'                        => true,
-        '@PHP74Migration'                        => true,
-        '@PHP80Migration'                        => true,
-        '@PSR2'                                  => true,
+        '@PHP82Migration'                        => true,
+        '@PSR12'                                 => true,
         'array_indentation'                      => true,
         'binary_operator_spaces'                 => ['default' => 'align_single_space_minimal'],
         'blank_line_before_statement'            => ['statements' => ['break', 'continue', 'declare', 'return', 'throw', 'try']],
         'class_attributes_separation'            => ['elements' => ['method' => 'one']],
         'concat_space'                           => ['spacing' => 'one'],
         'increment_style'                        => ['style' => 'post'],
-        'method_argument_space'                  => ['on_multiline' => 'ensure_fully_multiline',   'keep_multiple_spaces_after_comma' => true],
+        'method_argument_space'                  => ['on_multiline' => 'ensure_fully_multiline', 'keep_multiple_spaces_after_comma' => true],
         'method_chaining_indentation'            => true,
         'multiline_whitespace_before_semicolons' => ['strategy' => 'no_multi_line'],
         'no_extra_blank_lines'                   => true,
-        'no_trailing_comma_in_singleline_array'  => true,
         'no_unused_imports'                      => true,
         'no_whitespace_before_comma_in_array'    => true,
         'not_operator_with_successor_space'      => false,

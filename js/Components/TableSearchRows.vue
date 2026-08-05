@@ -65,7 +65,6 @@
 
 <script setup>
 import { computed, ref, watch, nextTick, inject } from "vue";
-import find from "lodash-es/find";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../helpers.js";
 
@@ -117,9 +116,7 @@ watch(props.forcedVisibleSearchInputs, (inputs) => {
     }
 
     nextTick().then(() => {
-        const inputElement = find(el.value, (el) => {
-            return el.name ===  latestInput;
-        });
+        const inputElement = el.value.find((el) => el.name === latestInput);
 
         if(inputElement) {
             inputElement.focus();

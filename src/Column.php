@@ -1,6 +1,6 @@
 <?php
 
-namespace ProtoneMedia\LaravelQueryBuilderInertiaJs;
+namespace PonchRobles\InertiaTable;
 
 use Illuminate\Contracts\Support\Arrayable;
 
@@ -9,14 +9,14 @@ class Column implements Arrayable
     public function __construct(
         public string $key,
         public string $label,
-        public bool $canBeHidden,
-        public bool $hidden,
-        public bool $sortable,
-        public bool|string $sorted
+        public bool $canBeHidden = true,
+        public bool $hidden = false,
+        public bool $sortable = false,
+        public bool|string $sorted = false,
     ) {
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'key'           => $this->key,

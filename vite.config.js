@@ -2,29 +2,32 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
-// https://vitejs.dev/config/
 export default defineConfig({
     plugins: [vue()],
 
     build: {
         lib: {
-            entry: resolve(__dirname, "js/main.js"),
-            name: "Inertia.js Tables for Laravel Query Builder",
-            fileName: (format) => `inertiajs-tables-laravel-query-builder.${format}.js`
+            entry: resolve(import.meta.dirname, "js/main.js"),
+            name: "InertiaTable",
+            fileName: (format) => `inertia-table.${format}.js`,
         },
         rollupOptions: {
             external: [
                 /^@inertiajs.*/,
-                /^@popperjs.*/,
-                /^lodash-es.*/,
+                /^@floating-ui.*/,
+                /^tailwind-merge.*/,
                 "qs",
-                "vue"
+                "vue",
             ],
             output: {
                 globals: {
-                    vue: "Vue"
-                }
-            }
-        }
-    }
-})
+                    vue: "Vue",
+                    qs: "qs",
+                    "@inertiajs/vue3": "InertiaVue3",
+                    "tailwind-merge": "tailwindMerge",
+                    "@floating-ui/dom": "FloatingUIDOM",
+                },
+            },
+        },
+    },
+});

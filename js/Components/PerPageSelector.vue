@@ -18,7 +18,6 @@
 
 <script setup>
 import { computed, inject } from "vue";
-import uniq from "lodash-es/uniq";
 import { getTranslations } from "../translations.js";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../helpers.js";
@@ -64,11 +63,8 @@ const props = defineProps({
 });
 
 const perPageOptions = computed(() => {
-    let options = [...props.options];
-
-    options.push(parseInt(props.value));
-
-    return uniq(options).sort((a, b) => a - b);
+    const options = [...new Set([...props.options, parseInt(props.value)])];
+    return options.sort((a, b) => a - b);
 });
 
 // Theme
