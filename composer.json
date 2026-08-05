@@ -1,33 +1,37 @@
 {
-    "name": "ponchrobles/inertiajs-tables-laravel-query-builder",
-    "description": "Inertia.js Front-end Components for Spatie's Laravel Query Builder",
-    "homepage": "https://github.com/ponchrobles/inertiajs-tables-laravel-query-builder",
+    "name": "ponchrobles/inertia-table",
+    "description": "Full-featured DataTable component for Inertia.js + Vue 3 with Spatie Laravel Query Builder integration",
+    "homepage": "https://github.com/ponchrobles/inertia-table",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "PonchRobles",
+            "name": "Alfonso Rodriguez (PonchRobles)",
             "email": "ponchrobles@gmail.com"
         }
     ],
     "require": {
         "php": "^8.2",
-        "illuminate/support": "^11.0"
+        "illuminate/support": "^11.0|^12.0|^13.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.8",
-        "inertiajs/inertia-laravel": "^1.0",
-        "orchestra/testbench": "^9.0",
-        "phpunit/phpunit": "^11.0"
+        "inertiajs/inertia-laravel": "^1.0|^2.0",
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^11.0",
+        "spatie/laravel-query-builder": "^6.0"
+    },
+    "suggest": {
+        "spatie/laravel-query-builder": "Required for server-side filtering, sorting and searching (^6.0)"
     },
     "autoload": {
         "psr-4": {
-            "ProtoneMedia\\LaravelQueryBuilderInertiaJs\\": "php"
+            "PonchRobles\\InertiaTable\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "ProtoneMedia\\LaravelQueryBuilderInertiaJs\\Tests\\": "tests"
+            "PonchRobles\\InertiaTable\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -43,7 +47,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "ProtoneMedia\\LaravelQueryBuilderInertiaJs\\InertiaTableServiceProvider"
+                "PonchRobles\\InertiaTable\\InertiaTableServiceProvider"
             ]
         }
     }

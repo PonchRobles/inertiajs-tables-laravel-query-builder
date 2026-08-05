@@ -1,37 +1,31 @@
 import { twMerge } from "tailwind-merge";
 
 export function get_theme_part(keys, fallbackTheme, themeVariables, ui) {
-    let currentFallbackTheme = { ...fallbackTheme };
-    let fallbackThemeClasses = null;
-    let currentThemeVariables = { ...themeVariables };
-    let themeVariableClasses = null;
-    let currentUi = { ...ui };
-    let uiClasses = null;
+    let fallbackThemeClasses = resolveNested(fallbackTheme, keys);
+    let themeVariableClasses = resolveNested(themeVariables, keys);
+    let uiClasses = resolveNested(ui, keys);
+
+    return twMerge(fallbackThemeClasses, themeVariableClasses, uiClasses);
+}
+
+function resolveNested(obj, keys) {
+    if (!obj || typeof obj !== "object") {
+        return null;
+    }
+
+    let current = obj;
+
     for (const key of keys) {
-        if (fallbackThemeClasses === null) {
-            if (key in currentFallbackTheme) {
-                currentFallbackTheme = currentFallbackTheme[key];
-                if (typeof currentFallbackTheme === "string") {
-                    fallbackThemeClasses = currentFallbackTheme;
-                }
-            }
+        if (current === null || current === undefined || typeof current !== "object" || !(key in current)) {
+            return null;
         }
-        if (themeVariableClasses === null) {
-            if (key in currentThemeVariables) {
-                currentThemeVariables = currentThemeVariables[key];
-                if (typeof currentThemeVariables === "string") {
-                    themeVariableClasses = currentThemeVariables;
-                }
-            }
-        }
-        if (uiClasses === null) {
-            if (key in currentUi) {
-                currentUi = currentUi[key];
-                if (typeof currentUi === "string") {
-                    uiClasses = currentUi;
-                }
-            }
+
+        current = current[key];
+
+        if (typeof current === "string") {
+            return current;
         }
     }
-    return twMerge(fallbackThemeClasses, themeVariableClasses, uiClasses);
+
+    return typeof current === "string" ? current : null;
 }

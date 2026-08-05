@@ -9,6 +9,10 @@ const translationsObject = {
         to: "to",
         reset: "Reset",
         search: "Search...",
+        select_all: "Select all",
+        clear_selection: "Clear selection",
+        start_date: "Start date",
+        end_date: "End date",
     }
 };
 

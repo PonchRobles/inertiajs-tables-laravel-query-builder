@@ -1,7 +1,7 @@
 <template>
   <th
     v-show="!cell.hidden"
-    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900"
+    :class="getTheme('th')"
   >
     <component
       :is="cell.sortable ? 'button' : 'div'"
@@ -17,10 +17,7 @@
             v-if="cell.sortable"
             aria-hidden="true"
             class="w-3 h-3 ml-2"
-            :class="{
-              'text-gray-400': !cell.sorted,
-              'text-green-500': cell.sorted,
-            }"
+            :class="cell.sorted ? getTheme('sort_icon_active') : getTheme('sort_icon')"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 320 512"
             :sorted="cell.sorted"
@@ -50,11 +47,14 @@
 </template>
 
 <script setup>
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { get_theme_part } from "../helpers.js";
+
 const props = defineProps({
-    cell: {
-        type: Object,
-        required: true,
-    },
+    cell: { type: Object, required: true },
+    color: { type: String, default: "primary" },
+    ui: { type: Object, default: undefined },
 });
 
 function onClick() {
@@ -62,4 +62,24 @@ function onClick() {
         props.cell.onSort(props.cell.key);
     }
 }
+
+// Theme
+const fallbackTheme = {
+    th: {
+        base: "py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900",
+    },
+    sort_icon: {
+        base: "text-gray-400",
+    },
+    sort_icon_active: {
+        base: "text-green-500",
+    },
+};
+const themeVariables = inject("themeVariables");
+const getTheme = (item) => {
+    return twMerge(
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.header_cell, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.header_cell, props.ui),
+    );
+};
 </script>

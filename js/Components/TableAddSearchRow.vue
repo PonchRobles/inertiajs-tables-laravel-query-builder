@@ -32,7 +32,7 @@
         v-for="(searchInput, key) in searchInputs"
         :key="key"
         :dusk="`add-search-row-${searchInput.key}`"
-        class="text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+        :class="getTheme('menu_item')"
         role="menuitem"
         @click.prevent="enableSearch(searchInput.key)"
       >
@@ -44,29 +44,16 @@
 
 <script setup>
 import ButtonWithDropdown from "./ButtonWithDropdown.vue";
-import { ref } from "vue";
+import { ref, inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { get_theme_part } from "../helpers.js";
 
 const props = defineProps({
-    searchInputs: {
-        type: Object,
-        required: true,
-    },
-
-    hasSearchInputsWithoutValue: {
-        type: Boolean,
-        required: true,
-    },
-
-    onAdd: {
-        type: Function,
-        required: true,
-    },
-
-    color: {
-        type: String,
-        default: "primary",
-        required: false,
-    },
+    searchInputs: { type: Object, required: true },
+    hasSearchInputsWithoutValue: { type: Boolean, required: true },
+    onAdd: { type: Function, required: true },
+    color: { type: String, default: "primary" },
+    ui: { type: Object, default: undefined },
 });
 
 const dropdown = ref(null);
@@ -75,4 +62,18 @@ function enableSearch(key) {
     props.onAdd(key);
     dropdown.value.hide();
 }
+
+// Theme
+const fallbackTheme = {
+    menu_item: {
+        base: "text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+    },
+};
+const themeVariables = inject("themeVariables");
+const getTheme = (item) => {
+    return twMerge(
+        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.add_search_row, props.ui),
+        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.add_search_row, props.ui),
+    );
+};
 </script>
