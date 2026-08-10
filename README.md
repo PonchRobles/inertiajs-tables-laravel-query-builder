@@ -688,19 +688,24 @@ const themeVariables = {
 
 ## Testing
 
-A huge [Laravel Dusk](https://laravel.com/docs/9.x/dusk) E2E test-suite can be found in the `app` directory. Here you'll find a Laravel + Inertia application.
+The PHP-side unit tests (Column, Filters, SearchInput, InertiaTable) live in the `tests` directory and run against [Orchestra Testbench](https://github.com/orchestral/testbench):
 
 ```bash
-cd app
+composer install
+composer test
+```
+
+A full demo application (Laravel + Inertia + Vue 3) is available in the `test-app` directory and can be used to manually exercise the client-side components:
+
+```bash
+cd test-app
 cp .env.example .env
 composer install
 npm install
-npm run production
+npm run build
 touch database/database.sqlite
 php artisan migrate:fresh --seed
-php artisan dusk:chrome-driver
 php artisan serve
-php artisan dusk
 ```
 
 ## Upgrading from v1
@@ -733,7 +738,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security
 
-If you discover any security related issues, please email alfonsorodriguez@live.com.mx instead of using the issue tracker.
+Please see [SECURITY](SECURITY.md) for our vulnerability disclosure policy.
 
 ## Credits
 
