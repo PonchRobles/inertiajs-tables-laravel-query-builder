@@ -730,7 +730,7 @@ php artisan serve
 
 ## Changelog
 
-Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
+Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently. Releases to npm and Packagist are automated — see [RELEASING.md](RELEASING.md) for details.
 
 ## Contributing
 
