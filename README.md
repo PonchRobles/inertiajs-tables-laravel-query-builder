@@ -1,8 +1,8 @@
 # Inertia.js Tables for Laravel Query Builder
 
-[![Latest Version on NPM](https://img.shields.io/npm/v/@ponchrobles_/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://npmjs.com/package/@ponchrobles_/inertiajs-tables-laravel-query-builder)
-[![npm](https://img.shields.io/npm/dt/@ponchrobles_/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://www.npmjs.com/package/@ponchrobles_/inertiajs-tables-laravel-query-builder)
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/ponchrobles/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://packagist.org/packages/ponchrobles/inertiajs-tables-laravel-query-builder)
+[![Latest Version on NPM](https://img.shields.io/npm/v/@ponchrobles/inertia-table.svg?style=flat-square)](https://npmjs.com/package/@ponchrobles/inertia-table)
+[![npm](https://img.shields.io/npm/dt/@ponchrobles/inertia-table.svg?style=flat-square)](https://www.npmjs.com/package/@ponchrobles/inertia-table)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/ponchrobles/inertia-table.svg?style=flat-square)](https://packagist.org/packages/ponchrobles/inertia-table)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
 ## [Fork reason](https://github.com/protonemedia/inertiajs-tables-laravel-query-builder/issues/122)
@@ -17,6 +17,10 @@ This package provides a *DataTables-like* experience for [Inertia.js](https://in
 * Global Search
 * Search per field
 * Select filters
+* Multi-select filters
+* Toggle (boolean) filters
+* Number range filters
+* Date range filters
 * Toggle columns
 * Sort columns
 * Pagination (support for Eloquent/API Resource/Simple/Cursor)
@@ -25,21 +29,21 @@ This package provides a *DataTables-like* experience for [Inertia.js](https://in
 ## Compatibility
 
 * [Vue 3](https://v3.vuejs.org/guide/installation.html)
-* [Laravel 11](https://laravel.com/)
-* [Inertia.js](https://inertiajs.com/)
+* [Laravel 11, 12, or 13](https://laravel.com/)
+* [Inertia.js](https://inertiajs.com/) v1 or v2
 * [Tailwind CSS v3](https://tailwindcss.com/) + [Forms plugin](https://github.com/tailwindlabs/tailwindcss-forms)
 * PHP 8.2+
 
 ## Installation
 
-You need to install both the server-side package and the client-side package. Note that this package is only compatible with Laravel 10, Vue 3.0, and requires the Tailwind Forms plugin.
+You need to install both the server-side package and the client-side package. Note that this package is only compatible with Laravel 11+, Vue 3.0, and requires the Tailwind Forms plugin.
 
 ### Server-side installation (Laravel)
 
 You can install the package via composer:
 
 ```bash
-composer require ponchrobles/inertiajs-tables-laravel-query-builder
+composer require ponchrobles/inertia-table
 ```
 
 The package will automatically register the Service Provider which provides a `table` method you can use on an Interia Response.
@@ -52,7 +56,7 @@ With the `searchInput` method, you can specify which attributes are searchable. 
 Though it's enough to pass in the column key, you may specify a custom label and default value.
 
 ```php
-use ProtoneMedia\LaravelQueryBuilderInertiaJs\InertiaTable;
+use PonchRobles\InertiaTable\InertiaTable;
 
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
 	$table->searchInput('name');
@@ -153,6 +157,80 @@ $users = QueryBuilder::for(/*...*/)
 			->allowedFilters([NumberRangeFilter::getQueryBuilderFilter('invoice_recall_count')]);
 ```
 
+#### Multi-select Filters
+
+This way, you can present the user a dropdown that supports selecting more than one option at once. Under the hood, this uses a custom filter that runs a `whereIn` query against the column, so it's meant for scalar columns (e.g. `category`, `status`) — not JSON/array columns.
+
+The `multiSelectFilter` method requires two arguments: the key, and a key-value array with the options.
+
+```php
+Inertia::render('Page/Index')->table(function (InertiaTable $table) {
+	$table->multiSelectFilter('category', [
+		'laravel' => 'Laravel',
+		'vue'     => 'Vue',
+		'devops'  => 'DevOps',
+	]);
+});
+```
+
+You may specify a custom label, a default value (an array of selected keys), and the *no filter* option, just like `selectFilter`.
+
+```php
+Inertia::render('Page/Index')->table(function (InertiaTable $table) {
+	$table->multiSelectFilter(
+		key: 'category',
+		options: $categories,
+		label: 'Categories',
+		defaultValue: ['laravel', 'vue'],
+		noFilterOption: true,
+		noFilterOptionLabel: 'All Categories'
+	);
+});
+```
+
+You need to use a custom allowed filter for this filter.
+```php
+use PonchRobles\InertiaTable\Filters\MultiSelectFilter;
+
+$posts = QueryBuilder::for(/*...*/)
+			->allowedFilters([MultiSelectFilter::getQueryBuilderFilter('category')]);
+```
+
+#### Date Range Filters
+
+This way, you can present the user two date inputs (start and end) to filter records within a date range. Under the hood, the custom filter runs a `whereBetween` query against the column, so it's meant for `date`/`datetime`/`timestamp` columns.
+
+The `dateRangeFilter` method requires one argument: the key.
+
+```php
+Inertia::render('Page/Index')->table(function (InertiaTable $table) {
+	$table->dateRangeFilter('published_at');
+});
+```
+
+You can specify a custom label, a default value (a two-element array `[start, end]`), boundaries, and the date format used for display.
+
+```php
+Inertia::render('Page/Index')->table(function (InertiaTable $table) {
+	$table->dateRangeFilter(
+		key: 'published_at',
+		label: 'Published Between',
+		defaultValue: ['2026-01-01', '2026-12-31'],
+		minDate: '2020-01-01',
+		maxDate: now()->toDateString(),
+		format: 'Y-m-d',
+	);
+});
+```
+
+You need to use a custom allowed filter for this filter.
+```php
+use PonchRobles\InertiaTable\Filters\DateRangeFilter;
+
+$posts = QueryBuilder::for(/*...*/)
+			->allowedFilters([DateRangeFilter::getQueryBuilderFilter('published_at')]);
+```
+
 #### Columns
 
 With the `column` method, you can specify which columns you want to be toggleable, sortable, and searchable. You must pass in at least a key or label for each column.
@@ -204,7 +282,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
-use ProtoneMedia\LaravelQueryBuilderInertiaJs\InertiaTable;
+use PonchRobles\InertiaTable\InertiaTable;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -252,9 +330,9 @@ class UserIndexController
 You can install the package via either `npm` or `yarn`:
 
 ```bash
-npm install @ponchrobles_/inertiajs-tables-laravel-query-builder --save
+npm install @ponchrobles/inertia-table --save
 
-yarn add @ponchrobles_/inertiajs-tables-laravel-query-builder
+yarn add @ponchrobles/inertia-table
 ```
 
 Add the repository path to the `content` array of your [Tailwind configuration file](https://tailwindcss.com/docs/content-configuration). This ensures that the styling also works on production builds.
@@ -262,7 +340,7 @@ Add the repository path to the `content` array of your [Tailwind configuration f
 ```js
 module.exports = {
   content: [
-	'./node_modules/@ponchrobles_/inertiajs-tables-laravel-query-builder/**/*.{js,vue}',
+	'./node_modules/@ponchrobles/inertia-table/**/*.{js,vue}',
   ]
 }
 ```
@@ -273,7 +351,7 @@ To use the `Table` component and all its related features, you must import the `
 
 ```vue
 <script setup>
-import { Table } from "@ponchrobles_/inertiajs-tables-laravel-query-builder";
+import { Table } from "@ponchrobles/inertia-table";
 
 defineProps(["users"])
 </script>
@@ -421,7 +499,7 @@ Lastly, pass the correct `name` property to each table in the Vue template. Opti
 
 ```vue
 <script setup>
-import { Table } from "@ponchrobles_/inertiajs-tables-laravel-query-builder";
+import { Table } from "@ponchrobles/inertia-table";
 
 defineProps(["companies", "users"])
 </script>
@@ -446,7 +524,7 @@ defineProps(["companies", "users"])
 You can override the default pagination translations with the `setTranslations` method. You can do this in your main JavaScript file:
 
 ```js
-import { setTranslations } from "@ponchrobles_/inertiajs-tables-laravel-query-builder";
+import { setTranslations } from "@ponchrobles/inertia-table";
 
 setTranslations({
   next: "Next",
