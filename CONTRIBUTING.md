@@ -44,13 +44,31 @@ If the project maintainer has any additional requirements, you will find them li
 
 - **Add tests!** - Your patch won't be accepted if it doesn't have tests.
 
-- **Document any change in behaviour** - Make sure the `README.md` and any other relevant documentation are kept up-to-date.
+- **Document every feature** - See [Documentation](#documentation) below; a PR that adds or changes public behavior without matching documentation will not be merged.
 
 - **Consider our release cycle** - We try to follow [SemVer v2.0.0](https://semver.org/). Randomly breaking public APIs is not an option.
 
 - **One pull request per feature** - If you want to do more than one thing, send multiple pull requests.
 
 - **Send coherent history** - Make sure each individual commit in your pull request is meaningful. If you had to make multiple intermediate commits while developing, please [squash them](https://www.git-scm.com/book/en/v2/Git-Tools-Rewriting-History#Changing-Multiple-Commit-Messages) before submitting.
+
+## Documentation
+
+**Every public feature must be documented in `README.md`, in prose, explaining what it does and how to use it.** This applies to new PHP methods on `InertiaTable` (filters, column options, etc.), new Vue props/events/slots, and any behavior change to an existing one. Code comments and tests are not a substitute — if it's not in the README, a user has no way to discover it.
+
+Undocumented features are effectively dead code: nobody can use what they don't know exists, and "it's mentioned in the PR" doesn't help someone installing the package six months later. This is why the fork's most-used filters (multi-select, date range) sat undocumented for a while even though the code shipped — a gap this rule exists to close going forward.
+
+Follow the existing pattern used for each filter (e.g. `#### Select Filters`, `#### Number range Filters`): a short section per feature that includes, at minimum:
+
+1. **What it is / when to use it** - one or two sentences of plain-language description.
+2. **The method signature or API surface** - required vs. optional arguments.
+3. **A minimal usage example** - the smallest code snippet that works.
+4. **A fuller example** - showing the optional parameters in use, if any exist.
+5. **Any required setup** - e.g. filters that need a custom `AllowedFilter` registered on the `QueryBuilder` query, like `MultiSelectFilter::getQueryBuilderFilter($column)`.
+
+If the feature is client-side (a Vue prop, slot, or event), add it to the relevant table (e.g. the `Table` properties table or the `Table.vue` slots table) *and* show a short template snippet demonstrating it, consistent with how `#### Table.vue slots` and `#### Custom column cells` are documented today.
+
+When in doubt, match the tone and structure of the surrounding section rather than inventing a new format.
 
 ## Releasing
 
