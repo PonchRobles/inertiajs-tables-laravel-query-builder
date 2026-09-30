@@ -38,6 +38,7 @@
         class="absolute inset-y-0 right-0 pr-3 flex items-center"
       >
         <button
+          type="button"
           :class="getTheme('remove_button')"
           :dusk="`remove-search-row-${searchInput.key}`"
           @click.prevent="onRemove(searchInput.key)"

@@ -5,6 +5,7 @@
   >
     <component
       :is="cell.sortable ? 'button' : 'div'"
+      :type="cell.sortable ? 'button' : undefined"
       class="w-full"
       :dusk="cell.sortable ? `sort-${cell.key}` : null"
       @click.prevent="onClick"
