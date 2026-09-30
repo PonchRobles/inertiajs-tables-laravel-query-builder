@@ -30,9 +30,10 @@ This package provides a *DataTables-like* experience for [Inertia.js](https://in
 
 * [Vue 3](https://v3.vuejs.org/guide/installation.html)
 * [Laravel 11, 12, or 13](https://laravel.com/)
-* [Inertia.js](https://inertiajs.com/) v1 or v2
+* [Inertia.js](https://inertiajs.com/) v1, v2, or v3
+* [Spatie Laravel Query Builder](https://github.com/spatie/laravel-query-builder) v6 or v7
 * [Tailwind CSS v3](https://tailwindcss.com/) + [Forms plugin](https://github.com/tailwindlabs/tailwindcss-forms)
-* PHP 8.2+
+* PHP 8.2 - 8.5
 
 ## Installation
 
