@@ -69,6 +69,9 @@ class FilterTest extends TestCase
 
         $filter->setValue(true);
         $this->assertSame('1', $filter->getValue());
+
+        $filter->setValue(false);
+        $this->assertSame('', $filter->getValue());
     }
 
     public function test_select_filter_set_value_ignores_non_scalar_values(): void
