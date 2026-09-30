@@ -22,7 +22,9 @@
     "scripts": {
         "dev": "vite build --watch",
         "build": "vite build && cp js/index.d.ts dist/index.d.ts",
-        "lint": "eslint js/ --fix"
+        "lint": "eslint js/ tests/js/ --fix",
+        "test": "vitest run",
+        "test:watch": "vitest"
     },
     "peerDependencies": {
         "@inertiajs/vue3": "^1.0.16 || ^2.0.0 || ^3.0.0",
@@ -35,9 +37,12 @@
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^6.0.9",
+        "@vue/test-utils": "^2.5.1",
         "eslint": "^10.11.0",
         "eslint-plugin-vue": "^10.11.1",
+        "jsdom": "^30.1.1",
         "vite": "^8.3.1",
+        "vitest": "^5.0.2",
         "vue": "^3.5.43"
     },
     "repository": {
