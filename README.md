@@ -1,8 +1,8 @@
 # Inertia.js Tables for Laravel Query Builder
 
-[![Latest Version on NPM](https://img.shields.io/npm/v/@ponchrobles/inertia-table.svg?style=flat-square)](https://npmjs.com/package/@ponchrobles/inertia-table)
-[![npm](https://img.shields.io/npm/dt/@ponchrobles/inertia-table.svg?style=flat-square)](https://www.npmjs.com/package/@ponchrobles/inertia-table)
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/ponchrobles/inertia-table.svg?style=flat-square)](https://packagist.org/packages/ponchrobles/inertia-table)
+[![Latest Version on NPM](https://img.shields.io/npm/v/@ponchrobles_/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://npmjs.com/package/@ponchrobles_/inertiajs-tables-laravel-query-builder)
+[![npm](https://img.shields.io/npm/dt/@ponchrobles_/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://www.npmjs.com/package/@ponchrobles_/inertiajs-tables-laravel-query-builder)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/ponchrobles/inertiajs-tables-laravel-query-builder.svg?style=flat-square)](https://packagist.org/packages/ponchrobles/inertiajs-tables-laravel-query-builder)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
 ## [Fork reason](https://github.com/protonemedia/inertiajs-tables-laravel-query-builder/issues/122)
@@ -44,7 +44,7 @@ You need to install both the server-side package and the client-side package. No
 You can install the package via composer:
 
 ```bash
-composer require ponchrobles/inertia-table
+composer require ponchrobles/inertiajs-tables-laravel-query-builder
 ```
 
 The package will automatically register the Service Provider which provides a `table` method you can use on an Interia Response.
@@ -331,9 +331,9 @@ class UserIndexController
 You can install the package via either `npm` or `yarn`:
 
 ```bash
-npm install @ponchrobles/inertia-table --save
+npm install @ponchrobles_/inertiajs-tables-laravel-query-builder --save
 
-yarn add @ponchrobles/inertia-table
+yarn add @ponchrobles_/inertiajs-tables-laravel-query-builder
 ```
 
 Add the repository path to the `content` array of your [Tailwind configuration file](https://tailwindcss.com/docs/content-configuration). This ensures that the styling also works on production builds.
@@ -341,7 +341,7 @@ Add the repository path to the `content` array of your [Tailwind configuration f
 ```js
 module.exports = {
   content: [
-	'./node_modules/@ponchrobles/inertia-table/**/*.{js,vue}',
+	'./node_modules/@ponchrobles_/inertiajs-tables-laravel-query-builder/**/*.{js,vue}',
   ]
 }
 ```
@@ -352,7 +352,7 @@ To use the `Table` component and all its related features, you must import the `
 
 ```vue
 <script setup>
-import { Table } from "@ponchrobles/inertia-table";
+import { Table } from "@ponchrobles_/inertiajs-tables-laravel-query-builder";
 
 defineProps(["users"])
 </script>
@@ -500,7 +500,7 @@ Lastly, pass the correct `name` property to each table in the Vue template. Opti
 
 ```vue
 <script setup>
-import { Table } from "@ponchrobles/inertia-table";
+import { Table } from "@ponchrobles_/inertiajs-tables-laravel-query-builder";
 
 defineProps(["companies", "users"])
 </script>
@@ -525,7 +525,7 @@ defineProps(["companies", "users"])
 You can override the default pagination translations with the `setTranslations` method. You can do this in your main JavaScript file:
 
 ```js
-import { setTranslations } from "@ponchrobles/inertia-table";
+import { setTranslations } from "@ponchrobles_/inertiajs-tables-laravel-query-builder";
 
 setTranslations({
   next: "Next",
