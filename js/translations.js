@@ -13,6 +13,9 @@ const translationsObject = {
         clear_selection: "Clear selection",
         start_date: "Start date",
         end_date: "End date",
+        add_search_fields: "Add search field",
+        show_hide_columns: "Show / Hide columns",
+        grouped_reset: "Reset",
     }
 };
 
