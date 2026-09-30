@@ -1,5 +1,5 @@
 {
-    "name": "ponchrobles/inertia-table",
+    "name": "ponchrobles/inertiajs-tables-laravel-query-builder",
     "description": "Full-featured DataTable component for Inertia.js + Vue 3 with Spatie Laravel Query Builder integration",
     "homepage": "https://github.com/PonchRobles/inertiajs-tables-laravel-query-builder",
     "type": "library",
