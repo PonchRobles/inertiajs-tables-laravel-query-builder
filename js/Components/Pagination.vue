@@ -195,7 +195,7 @@ const props = defineProps({
     onClick: { type: Function },
     perPageOptions: {
         type: Array,
-        default() { return () => [15, 30, 50, 100]; },
+        default() { return [15, 30, 50, 100]; },
     },
     onPerPageChange: {
         type: Function,
