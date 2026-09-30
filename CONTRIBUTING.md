@@ -36,6 +36,30 @@ Before submitting a pull request:
 - Check the codebase to ensure that your feature doesn't already exist.
 - Check the pull requests to ensure that another person hasn't already submitted the feature or fix.
 
+## Workflow
+
+1. **Start from an issue.** Every change starts from an issue with one `priority: P1`-`P4` label, one `type: *` label and a milestone (see [Labels](#labels) and [Milestones](#milestones)).
+2. **Branch from `main`** using `feature/<issue>-<slug>`, `fix/<issue>-<slug>` or `chore/<issue>-<slug>`.
+3. **Use [Conventional Commits](https://www.conventionalcommits.org/)** for commits and the PR title; release-please derives versions and the changelog from them.
+4. **Open a PR against `main`** with `Closes #<issue>` in the description. CI must be green.
+5. **Merge with rebase or a merge commit, never squash**, so each commit stays meaningful.
+6. **Releases:** release-please keeps a release PR open. Leave it open until every issue in the current milestone is closed, then merge it to publish one release (npm + Packagist). See [RELEASING.md](RELEASING.md).
+7. **Track progress** on the GitHub Project board, with the columns Todo / In progress / In review / Done.
+
+### Labels
+
+| Label | Meaning |
+| ----- | ------- |
+| `priority: P1` | Affects users now |
+| `priority: P2` | Quality and confidence |
+| `priority: P3` | Developer experience |
+| `priority: P4` | New feature |
+| `type: bug` / `type: feature` / `type: test` / `type: a11y` / `type: dx` / `type: docs` / `type: chore` | Kind of work |
+
+### Milestones
+
+Use one milestone per batch of work; everything in a milestone is released together.
+
 ## Requirements
 
 If the project maintainer has any additional requirements, you will find them listed here.

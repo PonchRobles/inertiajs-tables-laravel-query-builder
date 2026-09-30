@@ -1,0 +1,55 @@
+name: Bug report
+description: Report something that is not working as expected
+labels: ["type: bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please check existing issues and pull requests first.
+  - type: input
+    id: package-versions
+    attributes:
+      label: Package versions
+      description: Versions of the npm package and the composer package.
+      placeholder: "npm: @ponchrobles_/inertiajs-tables-laravel-query-builder x.y.z, composer: ponchrobles/inertiajs-tables-laravel-query-builder x.y.z"
+    validations:
+      required: true
+  - type: input
+    id: stack-versions
+    attributes:
+      label: Laravel / Inertia / Vue / Tailwind versions
+      placeholder: "Laravel x.y, Inertia x.y, Vue x.y, Tailwind x.y"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps or code needed to reproduce the problem.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include error messages or screenshots if relevant.
+    validations:
+      required: true
+  - type: input
+    id: repro-link
+    attributes:
+      label: Minimal reproduction link
+      description: Optional link to a minimal repository that reproduces the problem.
+      placeholder: https://github.com/...
+    validations:
+      required: false
