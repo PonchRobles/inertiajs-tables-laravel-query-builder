@@ -14,10 +14,13 @@ Releases are automated with [release-please](https://github.com/googleapis/relea
 3. When you merge that Release PR, release-please:
    - Creates a git tag (e.g. `v5.1.0`).
    - Publishes a GitHub Release for that tag.
-4. The GitHub Release triggers `.github/workflows/npm-publish.yml`, which builds the package and runs `npm publish` using npm's **trusted publishing (OIDC)** — no npm token stored in the repo.
-5. Packagist picks up the new tag automatically via its GitHub webhook/App integration (see one-time setup below) — no workflow needed on the PHP side, since Packagist resolves versions straight from tags.
+4. In the same run, `release-please.yml` chains two follow-up jobs, gated on release-please's `release_created` output:
+   - `publish-npm` calls `.github/workflows/npm-publish.yml` (reusable), which checks out the new tag, builds the package and runs `npm publish` using npm's **trusted publishing (OIDC)** — no npm token stored in the repo.
+   - `publish-packagist` calls `.github/workflows/packagist-publish.yml` (reusable), which calls the Packagist update API (`POST https://packagist.org/api/update-package`, authenticated with an `Authorization: Bearer USERNAME:API_TOKEN` header) so Packagist re-reads the repository and picks up the new tag. It uses the `PACKAGIST_USERNAME` and `PACKAGIST_TOKEN` repository secrets and fails with a clear error if either is missing.
 
-In short: merge Conventional Commits → merge the Release PR → npm and Packagist both update within minutes, with a changelog to match.
+   **Why the publish jobs live inside `release-please.yml`:** release-please creates the GitHub Release with the default `GITHUB_TOKEN`, and GitHub does not trigger other workflows from events created by `GITHUB_TOKEN`. Workflows listening on `release: published` would therefore never run, so publishing is chained directly from the release-please workflow instead.
+
+In short: merge Conventional Commits → merge the Release PR (creates tag + GitHub Release) → the chained jobs publish to npm and Packagist within minutes, with a changelog to match.
 
 ## One-time setup (do this once per registry)
 
@@ -25,15 +28,19 @@ In short: merge Conventional Commits → merge the Release PR → npm and Packag
 
 1. On [npmjs.com](https://www.npmjs.com), open the `@ponchrobles/inertia-table` package → **Settings → Trusted Publishers**.
 2. Add a GitHub Actions trusted publisher pointing at:
-   - Repository: `PonchRobles/inertia-table`
-   - Workflow file: `.github/workflows/npm-publish.yml`
+   - Repository: `PonchRobles/inertiajs-tables-laravel-query-builder`
+   - Workflow file: `release-please.yml` (the **calling** workflow, not `npm-publish.yml`). The npm docs state: "validation checks the calling workflow's name instead of the workflow that actually contains the publish command" when `workflow_call` is used, and that `id-token: write` must be given to both parent and child workflows (both are set up in this repo). The filename must match exactly, including `.yml`.
    - Environment: (leave blank unless you add one)
 3. No `NPM_TOKEN` secret is required — the workflow authenticates via OIDC (`id-token: write` permission) and npm automatically attaches a provenance attestation.
 
-### Packagist auto-update
+### Packagist
 
-1. On [packagist.org](https://packagist.org), open the `ponchrobles/inertia-table` package settings and make sure it's connected via the GitHub App/service hook (log in with GitHub, grant access to this repo) rather than relying on the nightly crawl.
-2. Once connected, every push (including new tags) notifies Packagist instantly — nothing to configure in this repo.
+1. **One-time manual submission:** the package is not on Packagist yet. Log in on [packagist.org](https://packagist.org), click **Submit**, and enter `https://github.com/PonchRobles/inertiajs-tables-laravel-query-builder`. The package will be named `ponchrobles/inertia-table` (from `composer.json`).
+2. Copy your API token from your Packagist profile page (**Show API Token**).
+3. In the GitHub repo, go to **Settings → Secrets and variables → Actions** and add two repository secrets:
+   - `PACKAGIST_USERNAME` — your Packagist username.
+   - `PACKAGIST_TOKEN` — the API token from step 2.
+4. From then on, each release created by release-please runs the `publish-packagist` job, which notifies Packagist to refresh the package. (Alternatively, you can enable the GitHub hook from the Packagist package page; the workflow is a safe fallback.)
 
 ## Manual/emergency release
 
@@ -48,4 +55,7 @@ git push origin main --tags
 gh release create vX.Y.Z --generate-notes
 ```
 
-Pushing the tag is enough for Packagist. Creating the GitHub Release triggers the npm publish workflow.
+A GitHub Release created by hand with `gh` (using your own credentials) does not run the chained jobs, since they only run inside `release-please.yml`. Publish manually instead:
+
+- In GitHub, go to **Actions**, pick **Publish to npm** and/or **Publish to Packagist**, click **Run workflow** and enter the tag (e.g. `v5.1.0`). Both workflows support `workflow_dispatch` for this, and the same route works to re-run a failed publish.
+- Note for npm: a manual `workflow_dispatch` run of `npm-publish.yml` is validated against `npm-publish.yml` itself, not `release-please.yml`, so it will fail trusted-publisher validation unless that filename is also registered as a trusted publisher (up to 10 are allowed).
