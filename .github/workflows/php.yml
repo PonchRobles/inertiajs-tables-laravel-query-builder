@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [8.2, 8.3, 8.4]
+        php: [8.2, 8.3, 8.4, 8.5]
         laravel: ["11.*", "12.*", "13.*"]
         dependency-version: [prefer-lowest, prefer-stable]
         exclude:
@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -29,7 +29,7 @@ jobs:
           coverage: none
 
       - name: Cache dependencies installed with composer
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.composer/cache
           key: php-${{ matrix.php }}-${{ matrix.laravel }}-composer-${{ hashFiles('composer.json') }}

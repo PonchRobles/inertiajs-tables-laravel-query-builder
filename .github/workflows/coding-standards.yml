@@ -9,16 +9,16 @@ jobs:
         php-version:
           - "8.2"
         node-version:
-          - 20.14.0
+          - 24
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.head_ref }}
 
       - name: "Install Node"
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "${{ matrix.node-version }}"
 
@@ -30,7 +30,7 @@ jobs:
 
       - name: Cache node modules
         id: cache-npm
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         env:
           cache-name: cache-node-modules
         with:
@@ -51,7 +51,7 @@ jobs:
         run: "npm ci --ignore-scripts"
 
       - name: "Cache dependencies installed with composer"
-        uses: "actions/cache@v4"
+        uses: "actions/cache@v6"
         with:
           path: "~/.composer/cache"
           key: "php-${{ matrix.php-version }}-composer-${{ hashFiles('composer.lock') }}"
@@ -64,7 +64,7 @@ jobs:
         run: mkdir -p .build/php-cs-fixer
 
       - name: "Cache cache directory for friendsofphp/php-cs-fixer"
-        uses: "actions/cache@v4"
+        uses: "actions/cache@v6"
         with:
           path: "~/.build/php-cs-fixer"
           key: "php-${{ matrix.php-version }}-php-cs-fixer-${{ github.sha }}"
@@ -77,6 +77,6 @@ jobs:
         run: "composer php-cs-fixer"
 
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Fix styling
