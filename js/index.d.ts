@@ -52,6 +52,9 @@ export interface Translations {
     clear_selection?: string;
     start_date?: string;
     end_date?: string;
+    add_search_fields?: string;
+    show_hide_columns?: string;
+    grouped_reset?: string;
     [key: string]: string | undefined;
 }
 
