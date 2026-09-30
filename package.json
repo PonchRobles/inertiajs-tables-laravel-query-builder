@@ -42,7 +42,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/PonchRobles/inertia-table.git"
+        "url": "git+https://github.com/PonchRobles/inertiajs-tables-laravel-query-builder.git"
     },
     "keywords": [
         "inertia",
@@ -56,7 +56,7 @@
         "tailwindcss"
     ],
     "bugs": {
-        "url": "https://github.com/PonchRobles/inertia-table/issues"
+        "url": "https://github.com/PonchRobles/inertiajs-tables-laravel-query-builder/issues"
     },
-    "homepage": "https://github.com/PonchRobles/inertia-table#readme"
+    "homepage": "https://github.com/PonchRobles/inertiajs-tables-laravel-query-builder#readme"
 }
