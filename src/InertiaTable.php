@@ -16,9 +16,11 @@ use PonchRobles\InertiaTable\Filters\ToggleFilter;
 
 class InertiaTable
 {
+    public const DEFAULT_PER_PAGE_OPTIONS = [15, 30, 50, 100];
+
     private string $name          = 'default';
     private string $pageName      = 'page';
-    private array $perPageOptions = [15, 30, 50, 100];
+    private array $perPageOptions = self::DEFAULT_PER_PAGE_OPTIONS;
     private string $defaultSort   = '';
 
     private Request $request;
@@ -67,6 +69,39 @@ class InertiaTable
             $this->name === 'default' ? $key : "{$this->name}_{$key}",
             $default
         );
+    }
+
+    /**
+     * Resolve a validated per-page value from the request. Returns the requested
+     * value only if it is an integer present in $options, otherwise $default
+     * (or the first option when no default is given).
+     *
+     * @param int[] $options
+     *
+     * @throws \InvalidArgumentException when $options is empty
+     */
+    public static function perPage(
+        ?Request $request = null,
+        array $options = self::DEFAULT_PER_PAGE_OPTIONS,
+        ?int $default = null,
+    ): int {
+        if ($options === []) {
+            throw new \InvalidArgumentException('The per page options must not be empty.');
+        }
+
+        $options = array_values($options);
+        $request ??= request();
+        $value = $request->query('perPage');
+
+        if (is_string($value) && preg_match('/^[1-9][0-9]*$/', $value) === 1) {
+            $value = (int) $value;
+
+            if (in_array($value, $options, true)) {
+                return $value;
+            }
+        }
+
+        return $default ?? $options[0];
     }
 
     /**

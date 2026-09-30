@@ -305,7 +305,7 @@ class UserIndexController
 			->defaultSort('name')
 			->allowedSorts(['name', 'email', 'language_code'])
 			->allowedFilters(['name', 'email', 'language_code', $globalSearch])
-			->paginate()
+			->paginate(InertiaTable::perPage())
 			->withQueryString();
 
 		return Inertia::render('Users/Index', [
@@ -324,6 +324,29 @@ class UserIndexController
 			  ]);
 	}
 }
+```
+
+#### Validating the per-page value
+
+The `perPage` query parameter comes from the user, so never pass it straight to `paginate()`: values like `-1`, `0`, `abc` or `100000` would reach your database. Use the static `InertiaTable::perPage()` helper instead. It returns the requested value only if it is an integer that is present in the allowed options, and otherwise falls back to a default.
+
+```php
+InertiaTable::perPage(
+	?Request $request = null,          // defaults to the current request
+	array $options = [15, 30, 50, 100], // allowed values
+	?int $default = null,              // fallback, defaults to the first option
+): int
+```
+
+- Only whole positive numbers in `$options` are accepted; `-1`, `0`, `abc`, `15.5` and values not in the options all fall back to `$default ?? $options[0]`.
+- The helper always reads the plain `perPage` parameter, because that is what the frontend sends. Note that `perPage` is currently shared by all tables on a page: there is no per-table prefix (`{name}_perPage` is ignored).
+- Passing an empty `$options` array throws an `InvalidArgumentException`.
+- Keep the options in sync with the ones sent to the frontend, e.g. `perPageOptions([10, 25, 50])` together with `InertiaTable::perPage(options: [10, 25, 50])`.
+
+```php
+$users = QueryBuilder::for(User::class)
+	->paginate(InertiaTable::perPage(options: [10, 25, 50], default: 25))
+	->withQueryString();
 ```
 
 ### Client-side installation (Inertia)
