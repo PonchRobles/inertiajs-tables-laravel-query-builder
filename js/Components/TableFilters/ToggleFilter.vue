@@ -13,6 +13,7 @@
       />
     </label>
     <button
+      type="button"
       :class="getTheme('reset_button')"
       @click.prevent="onFilterChange(filter.key, null)"
     >

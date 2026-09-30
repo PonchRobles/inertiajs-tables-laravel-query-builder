@@ -27,6 +27,7 @@
         <button
           v-if="'searchFields' in actions && actions.searchFields.show"
           dusk="add-search-fields-button"
+          type="button"
           :class="getTheme('menu_item')"
           role="menuitem"
           @click="isSearchFieldsDisplayed = true"
@@ -48,6 +49,7 @@
         <button
           v-if="'toggleColumns' in actions && actions.toggleColumns.show"
           dusk="toggle-column-button"
+          type="button"
           :class="getTheme('menu_item')"
           role="menuitem"
           @click="isToggleColumnsDisplayed = true"
@@ -71,6 +73,7 @@
         <button
           v-if="'reset' in actions"
           dusk="reset-button"
+          type="button"
           :class="getTheme('reset_button')"
           role="menuitem"
           @click="actions.reset?.onClick"
@@ -117,6 +120,7 @@
           v-for="(searchInput, key) in actions.searchFields.searchInputs"
           :key="key"
           :dusk="`add-search-row-${searchInput.key}`"
+          type="button"
           :class="getTheme('search_item')"
           role="menuitem"
           @click.prevent="actions.searchFields.onClick(searchInput.key)"
