@@ -58,4 +58,22 @@ class ColumnTest extends TestCase
         $this->assertFalse($column->sortable);
         $this->assertFalse($column->sorted);
     }
+
+    public function test_column_to_array_reflects_hidden_and_desc_sort(): void
+    {
+        $column = new Column(
+            key: 'created_at',
+            label: 'Created',
+            canBeHidden: true,
+            hidden: true,
+            sortable: true,
+            sorted: 'desc',
+        );
+
+        $array = $column->toArray();
+
+        $this->assertTrue($array['hidden']);
+        $this->assertTrue($array['can_be_hidden']);
+        $this->assertEquals('desc', $array['sorted']);
+    }
 }
