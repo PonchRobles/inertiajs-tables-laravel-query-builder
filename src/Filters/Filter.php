@@ -47,12 +47,18 @@ class Filter implements Filterable
             $options = Arr::prepend($options, $this->noFilterOptionLabel, '');
         }
 
+        $orderedOptions = [];
+        foreach ($options as $optionValue => $optionLabel) {
+            $orderedOptions[] = ['value' => (string) $optionValue, 'label' => $optionLabel];
+        }
+
         return [
-            'key'     => $this->key,
-            'label'   => $this->label,
-            'options' => $options,
-            'value'   => $this->value,
-            'type'    => $this->type,
+            'key'             => $this->key,
+            'label'           => $this->label,
+            'options'         => $options,
+            'ordered_options' => $orderedOptions,
+            'value'           => $this->value,
+            'type'            => $this->type,
         ];
     }
 }

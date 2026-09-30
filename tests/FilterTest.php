@@ -90,6 +90,29 @@ class FilterTest extends TestCase
         $this->assertNull($filter->getValue());
     }
 
+    public function test_select_filter_to_array_ordered_options_preserve_order(): void
+    {
+        $filter = new Filter(
+            key: 'n',
+            label: 'N',
+            options: [3 => 'c', 1 => 'a'],
+            noFilterOptionLabel: 'All',
+        );
+
+        $this->assertSame([
+            ['value' => '', 'label' => 'All'],
+            ['value' => '3', 'label' => 'c'],
+            ['value' => '1', 'label' => 'a'],
+        ], $filter->toArray()['ordered_options']);
+
+        $filter = new Filter(key: 'n', label: 'N', options: [3 => 'c', 1 => 'a'], noFilterOption: false);
+
+        $this->assertSame([
+            ['value' => '3', 'label' => 'c'],
+            ['value' => '1', 'label' => 'a'],
+        ], $filter->toArray()['ordered_options']);
+    }
+
     public function test_toggle_filter(): void
     {
         $filter = new ToggleFilter(key: 'is_admin', label: 'Admin Only');

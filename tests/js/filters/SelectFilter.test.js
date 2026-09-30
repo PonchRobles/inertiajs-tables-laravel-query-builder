@@ -41,4 +41,23 @@ describe("SelectFilter", () => {
         await wrapper.find("select").setValue("");
         expect(onFilterChange).toHaveBeenCalledWith("status", "");
     });
+
+    // Real PHP json_encode output for options [3 => 'c', 1 => 'a'] with the '' option prepended.
+    const phpJson = "{\"options\":{\"\":\"-\",\"3\":\"c\",\"1\":\"a\"},\"ordered_options\":[{\"value\":\"\",\"label\":\"-\"},{\"value\":\"3\",\"label\":\"c\"},{\"value\":\"1\",\"label\":\"a\"}]}";
+
+    it("keeps the server option order using ordered_options", () => {
+        const { options, ordered_options } = JSON.parse(phpJson);
+        const onFilterChange = vi.fn();
+        const wrapper = mount(SelectFilter, {
+            props: { filter: { key: "n", value: "", options, ordered_options }, onFilterChange },
+        });
+        expect(wrapper.findAll("option").map((o) => o.element.value)).toEqual(["", "3", "1"]);
+        expect(wrapper.findAll("option").map((o) => o.text())).toEqual(["-", "c", "a"]);
+    });
+
+    it("falls back to options when ordered_options is absent", () => {
+        const { options } = JSON.parse(phpJson);
+        const { wrapper } = make("", options);
+        expect(wrapper.findAll("option").map((o) => o.element.value)).toEqual(["1", "3", ""]);
+    });
 });

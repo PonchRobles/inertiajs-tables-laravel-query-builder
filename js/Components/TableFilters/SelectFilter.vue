@@ -6,17 +6,17 @@
     @change="onFilterChange(filter.key, $event.target.value)"
   >
     <option
-      v-for="(option, optionKey) in filter.options"
-      :key="optionKey"
-      :value="optionKey"
+      v-for="option in options"
+      :key="option.value"
+      :value="option.value"
     >
-      {{ option }}
+      {{ option.label }}
     </option>
   </select>
 </template>
 
 <script setup>
-import { inject } from "vue";
+import { computed, inject } from "vue";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../../helpers.js";
 
@@ -41,6 +41,14 @@ const props = defineProps({
         required: false,
         type: Object,
     },
+});
+
+// PHP sends `ordered_options` because JS reorders integer-like keys of `options`.
+const options = computed(() => {
+    if (Array.isArray(props.filter.ordered_options)) {
+        return props.filter.ordered_options;
+    }
+    return Object.entries(props.filter.options ?? {}).map(([value, label]) => ({ value, label }));
 });
 
 // Theme
