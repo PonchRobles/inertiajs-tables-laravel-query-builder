@@ -29,7 +29,7 @@ class InertiaTableTest extends TestCase
 
     public function test_basic_table_creation(): void
     {
-        $table = $this->createTable();
+        $table    = $this->createTable();
         $response = Inertia::render('Users/Index');
         $table->applyTo($response);
 
@@ -49,7 +49,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertCount(2, $qb['columns']);
         $this->assertEquals('name', $qb['columns'][0]->key);
@@ -65,7 +65,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertNotNull($qb['globalSearch']);
         $this->assertEquals('global', $qb['globalSearch']->key);
@@ -84,7 +84,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertTrue($qb['hasFilters']);
         $this->assertCount(1, $qb['filters']);
@@ -100,7 +100,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertTrue($qb['hasFilters']);
         $this->assertEquals('toggle', $qb['filters'][0]->getType());
@@ -115,7 +115,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertTrue($qb['hasFilters']);
         $this->assertEquals('number_range', $qb['filters'][0]->getType());
@@ -146,7 +146,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertEquals([10, 25, 50], $qb['perPageOptions']);
     }
@@ -160,7 +160,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertEquals('name', $qb['defaultSort']);
         $this->assertEquals('name', $qb['sort']);
@@ -175,7 +175,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertTrue($qb['hasSearchInputs']);
     }
@@ -190,7 +190,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertNotNull($qb['globalSearch']);
     }
@@ -212,7 +212,7 @@ class InertiaTableTest extends TestCase
     public function test_column_sorting_from_query_string(): void
     {
         $request = Request::create('/', 'GET', ['sort' => 'name']);
-        $table = new InertiaTable($request);
+        $table   = new InertiaTable($request);
 
         $table->column(key: 'name', label: 'Name', sortable: true)
             ->column(key: 'email', label: 'Email', sortable: true);
@@ -221,7 +221,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertEquals('asc', $qb['columns'][0]->sorted);
         $this->assertFalse($qb['columns'][1]->sorted);
@@ -230,7 +230,7 @@ class InertiaTableTest extends TestCase
     public function test_column_sorting_descending_from_query_string(): void
     {
         $request = Request::create('/', 'GET', ['sort' => '-email']);
-        $table = new InertiaTable($request);
+        $table   = new InertiaTable($request);
 
         $table->column(key: 'name', label: 'Name', sortable: true)
             ->column(key: 'email', label: 'Email', sortable: true);
@@ -239,7 +239,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertFalse($qb['columns'][0]->sorted);
         $this->assertEquals('desc', $qb['columns'][1]->sorted);
@@ -266,7 +266,7 @@ class InertiaTableTest extends TestCase
     public function test_filter_value_from_query_string(): void
     {
         $request = Request::create('/', 'GET', ['filter' => ['status' => 'active']]);
-        $table = new InertiaTable($request);
+        $table   = new InertiaTable($request);
 
         $table->selectFilter('status', ['active' => 'Active', 'inactive' => 'Inactive']);
 
@@ -274,7 +274,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertEquals('active', $qb['filters'][0]->getValue());
         $this->assertTrue($qb['hasEnabledFilters']);
@@ -283,7 +283,7 @@ class InertiaTableTest extends TestCase
     public function test_search_value_from_query_string(): void
     {
         $request = Request::create('/', 'GET', ['filter' => ['global' => 'john']]);
-        $table = new InertiaTable($request);
+        $table   = new InertiaTable($request);
 
         $table->withGlobalSearch();
 
@@ -291,7 +291,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertEquals('john', $qb['globalSearch']->value);
     }
@@ -310,7 +310,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertTrue($qb['hasFilters']);
         $this->assertEquals('date_range', $qb['filters'][0]->getType());
@@ -330,7 +330,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertEquals(['2024-01-01', '2024-06-30'], $qb['filters'][0]->getValue());
         $this->assertTrue($qb['hasEnabledFilters']);
@@ -340,16 +340,16 @@ class InertiaTableTest extends TestCase
     {
         $table = $this->createTable();
         $table->multiSelectFilter('tags', [
-            'php'  => 'PHP',
-            'js'   => 'JavaScript',
-            'vue'  => 'Vue',
+            'php' => 'PHP',
+            'js'  => 'JavaScript',
+            'vue' => 'Vue',
         ], 'Tags');
 
         $response = Inertia::render('Users/Index');
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertTrue($qb['hasFilters']);
         $this->assertEquals('multi_select', $qb['filters'][0]->getType());
@@ -368,7 +368,7 @@ class InertiaTableTest extends TestCase
         $table->applyTo($response);
 
         $props = $this->getProps($response);
-        $qb = $props['queryBuilderProps']['default'];
+        $qb    = $props['queryBuilderProps']['default'];
 
         $this->assertEquals(['php', 'vue'], $qb['filters'][0]->getValue());
         $this->assertTrue($qb['hasEnabledFilters']);
