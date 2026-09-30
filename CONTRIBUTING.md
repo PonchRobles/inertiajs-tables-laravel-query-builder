@@ -39,12 +39,13 @@ Before submitting a pull request:
 ## Workflow
 
 1. **Start from an issue.** Every change starts from an issue with one `priority: P1`-`P4` label, one `type: *` label and a milestone (see [Labels](#labels) and [Milestones](#milestones)).
-2. **Branch from `main`** using `feature/<issue>-<slug>`, `fix/<issue>-<slug>` or `chore/<issue>-<slug>`.
+2. **Branch from the milestone branch.** Each milestone has an integration branch, `milestone/<name>`, created from `main`. Create issue branches from it using `feature/<issue>-<slug>`, `fix/<issue>-<slug>`, `chore/<issue>-<slug>`, `docs/<issue>-<slug>` or `test/<issue>-<slug>`.
 3. **Use [Conventional Commits](https://www.conventionalcommits.org/)** for commits and the PR title; release-please derives versions and the changelog from them.
-4. **Open a PR against `main`** with `Closes #<issue>` in the description. CI must be green.
+4. **Open a PR against `milestone/<name>`**, not `main`, with `Closes #<issue>` in the description. CI must be green. Tests are required when the change is testable (PHPUnit for `src/`, Vitest for `js/`).
 5. **Merge with rebase or a merge commit, never squash**, so each commit stays meaningful.
-6. **Releases:** release-please keeps a release PR open. Leave it open until every issue in the current milestone is closed, then merge it to publish one release (npm + Packagist). See [RELEASING.md](RELEASING.md).
-7. **Track progress** on the GitHub Project board, with the columns Todo / In progress / In review / Done.
+6. **Close out the milestone:** `Closes #<issue>` only auto-closes issues on merge to `main`, so the final `milestone/<name>` → `main` PR lists every issue in the milestone (`Closes #A, Closes #B, ...`).
+7. **Releases:** merging the final `milestone/<name>` → `main` PR triggers release-please, which publishes one release per milestone (npm + Packagist). See [RELEASING.md](RELEASING.md).
+8. **Track progress** on the GitHub Project board, with the columns Todo / In progress / In review / Done.
 
 ### Labels
 
@@ -58,7 +59,7 @@ Before submitting a pull request:
 
 ### Milestones
 
-Use one milestone per batch of work; everything in a milestone is released together.
+Use one milestone per batch of work, with one `milestone/<name>` integration branch; everything in a milestone is merged to `main` and released together.
 
 ## Requirements
 
