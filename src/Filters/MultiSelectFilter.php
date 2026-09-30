@@ -2,7 +2,6 @@
 
 namespace PonchRobles\InertiaTable\Filters;
 
-use Illuminate\Support\Arr;
 use PonchRobles\InertiaTable\QueryBuilderFilters\FiltersMultiSelect;
 use Spatie\QueryBuilder\AllowedFilter;
 
@@ -53,6 +52,6 @@ class MultiSelectFilter implements Filterable
 
     public static function getQueryBuilderFilter(string $column): AllowedFilter
     {
-        return AllowedFilter::custom($column, new FiltersMultiSelect);
+        return AllowedFilter::custom($column, new FiltersMultiSelect());
     }
 }

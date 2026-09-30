@@ -58,6 +58,6 @@ class NumberRangeFilter implements Filterable
 
     public static function getQueryBuilderFilter(string $column): AllowedFilter
     {
-        return AllowedFilter::custom($column, new FiltersNumberRange);
+        return AllowedFilter::custom($column, new FiltersNumberRange());
     }
 }

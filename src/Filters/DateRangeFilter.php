@@ -54,6 +54,6 @@ class DateRangeFilter implements Filterable
 
     public static function getQueryBuilderFilter(string $column): AllowedFilter
     {
-        return AllowedFilter::custom($column, new FiltersDateRange);
+        return AllowedFilter::custom($column, new FiltersDateRange());
     }
 }

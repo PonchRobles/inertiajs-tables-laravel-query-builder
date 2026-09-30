@@ -16,10 +16,10 @@ use PonchRobles\InertiaTable\Filters\ToggleFilter;
 
 class InertiaTable
 {
-    private string $name = 'default';
-    private string $pageName = 'page';
+    private string $name          = 'default';
+    private string $pageName      = 'page';
     private array $perPageOptions = [15, 30, 50, 100];
-    private string $defaultSort = '';
+    private string $defaultSort   = '';
 
     private Request $request;
     private Collection $columns;
@@ -32,9 +32,9 @@ class InertiaTable
     public function __construct(Request $request)
     {
         $this->request      = $request;
-        $this->columns      = new Collection;
-        $this->searchInputs = new Collection;
-        $this->filters      = new Collection;
+        $this->columns      = new Collection();
+        $this->searchInputs = new Collection();
+        $this->filters      = new Collection();
 
         if (static::$defaultGlobalSearch !== false) {
             $this->withGlobalSearch(static::$defaultGlobalSearch);
@@ -54,7 +54,7 @@ class InertiaTable
      */
     public static function resetDefaults(): void
     {
-        static::$defaultGlobalSearch = false;
+        static::$defaultGlobalSearch       = false;
         static::$defaultQueryBuilderConfig = [];
     }
 
@@ -163,13 +163,13 @@ class InertiaTable
     protected function transformColumns(): Collection
     {
         $columns = $this->query('columns', []);
-        $sort = $this->query('sort', $this->defaultSort);
+        $sort    = $this->query('sort', $this->defaultSort);
 
         return $this->columns->map(function (Column $column) use ($columns, $sort) {
             $key = $column->key;
 
-            if (! empty($columns)) {
-                $column->hidden = ! in_array($key, $columns);
+            if (!empty($columns)) {
+                $column->hidden = !in_array($key, $columns);
             }
 
             if ($sort === $key) {

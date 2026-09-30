@@ -10,7 +10,7 @@ class FiltersDateRange implements Filter
 {
     public function __invoke(Builder $query, $value, string $property): void
     {
-        $value = array_values(array_filter((array) $value, fn ($v) => ! empty($v)));
+        $value = array_values(array_filter((array) $value, fn ($v) => !empty($v)));
 
         if (count($value) < 2) {
             return;
@@ -18,7 +18,7 @@ class FiltersDateRange implements Filter
 
         try {
             $start = Carbon::parse($value[0])->startOfDay();
-            $end = Carbon::parse($value[1])->endOfDay();
+            $end   = Carbon::parse($value[1])->endOfDay();
         } catch (\Exception) {
             return;
         }
