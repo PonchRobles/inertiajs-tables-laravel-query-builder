@@ -21,6 +21,9 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
+# Claude Code local settings and agent worktrees
+.claude/
+
 # PHP
 build
 composer.lock
