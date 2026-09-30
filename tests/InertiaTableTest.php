@@ -373,4 +373,57 @@ class InertiaTableTest extends TestCase
         $this->assertEquals(['php', 'vue'], $qb['filters'][0]->getValue());
         $this->assertTrue($qb['hasEnabledFilters']);
     }
+
+    public function test_per_page_returns_valid_value_from_options(): void
+    {
+        $this->assertSame(50, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => '50'])));
+    }
+
+    public function test_per_page_falls_back_for_invalid_values(): void
+    {
+        foreach (['-1', '0', 'abc', '15.5', '20', '', '100000'] as $value) {
+            $this->assertSame(15, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => $value])), "value: {$value}");
+        }
+    }
+
+    public function test_per_page_falls_back_for_array_value(): void
+    {
+        $this->assertSame(15, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => ['15']])));
+    }
+
+    public function test_per_page_falls_back_when_param_is_missing(): void
+    {
+        $this->assertSame(15, InertiaTable::perPage(Request::create('/')));
+    }
+
+    public function test_per_page_supports_custom_options_and_default(): void
+    {
+        $request = Request::create('/', 'GET', ['perPage' => '25']);
+
+        $this->assertSame(25, InertiaTable::perPage($request, [10, 25]));
+        $this->assertSame(10, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => '15']), [10, 25]));
+        $this->assertSame(25, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => '15']), [10, 25], 25));
+    }
+
+    public function test_per_page_ignores_prefixed_param(): void
+    {
+        $request = Request::create('/', 'GET', ['perPage' => '30', 'users_perPage' => '100']);
+
+        $this->assertSame(30, InertiaTable::perPage($request));
+        $this->assertSame(15, InertiaTable::perPage(Request::create('/', 'GET', ['users_perPage' => '100'])));
+    }
+
+    public function test_per_page_uses_current_request_when_none_given(): void
+    {
+        $this->app->instance('request', Request::create('/', 'GET', ['perPage' => '30']));
+
+        $this->assertSame(30, InertiaTable::perPage());
+    }
+
+    public function test_per_page_throws_for_empty_options(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        InertiaTable::perPage(Request::create('/'), []);
+    }
 }
