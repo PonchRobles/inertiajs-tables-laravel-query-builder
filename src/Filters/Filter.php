@@ -36,7 +36,7 @@ class Filter implements Filterable
 
     public function setValue(mixed $value): void
     {
-        $this->value = $value;
+        $this->value = is_scalar($value) ? (string) $value : null;
     }
 
     public function toArray(): array

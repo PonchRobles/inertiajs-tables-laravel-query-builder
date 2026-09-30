@@ -54,6 +54,39 @@ class FilterTest extends TestCase
         $this->assertArrayNotHasKey('', $array['options']);
     }
 
+    public function test_select_filter_set_value_casts_scalars_to_string(): void
+    {
+        $filter = new Filter(key: 'status', label: 'Status', options: ['1' => 'One']);
+
+        $filter->setValue('active');
+        $this->assertSame('active', $filter->getValue());
+
+        $filter->setValue(1);
+        $this->assertSame('1', $filter->getValue());
+
+        $filter->setValue(1.5);
+        $this->assertSame('1.5', $filter->getValue());
+
+        $filter->setValue(true);
+        $this->assertSame('1', $filter->getValue());
+    }
+
+    public function test_select_filter_set_value_ignores_non_scalar_values(): void
+    {
+        $filter = new Filter(key: 'status', label: 'Status', options: ['a' => 'A'], value: 'a');
+
+        $filter->setValue(['a', 'b']);
+        $this->assertNull($filter->getValue());
+
+        $filter->setValue('a');
+        $filter->setValue(new \stdClass());
+        $this->assertNull($filter->getValue());
+
+        $filter->setValue('a');
+        $filter->setValue(null);
+        $this->assertNull($filter->getValue());
+    }
+
     public function test_toggle_filter(): void
     {
         $filter = new ToggleFilter(key: 'is_admin', label: 'Admin Only');
