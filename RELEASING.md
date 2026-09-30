@@ -14,13 +14,15 @@ Releases are automated with [release-please](https://github.com/googleapis/relea
 3. When you merge that Release PR, release-please:
    - Creates a git tag (e.g. `5.1.0`).
    - Publishes a GitHub Release for that tag.
-4. In the same run, `release-please.yml` chains two follow-up jobs, gated on release-please's `release_created` output:
+4. In the same run, `release-please.yml` first runs the `tests` job (calls `php.yml`, the full PHP/Laravel matrix) and the `lint-build` job (`npm run lint`, failing if lint changes files, then `npm run build`) on the release commit. Only if both pass, it chains two publish jobs, gated on release-please's `release_created` output:
    - `publish-npm` calls `.github/workflows/npm-publish.yml` (reusable), which checks out the new tag, builds the package and runs `npm publish` using npm's **trusted publishing (OIDC)** — no npm token stored in the repo.
    - `publish-packagist` calls `.github/workflows/packagist-publish.yml` (reusable), which calls the Packagist update API (`POST https://packagist.org/api/update-package`, authenticated with an `Authorization: Bearer USERNAME:API_TOKEN` header) so Packagist re-reads the repository and picks up the new tag. It uses the `PACKAGIST_USERNAME` and `PACKAGIST_TOKEN` repository secrets and fails with a clear error if either is missing.
 
    **Why the publish jobs live inside `release-please.yml`:** release-please creates the GitHub Release with the default `GITHUB_TOKEN`, and GitHub does not trigger other workflows from events created by `GITHUB_TOKEN`. Workflows listening on `release: published` would therefore never run, so publishing is chained directly from the release-please workflow instead.
 
-In short: merge Conventional Commits → merge the Release PR (creates tag + GitHub Release) → the chained jobs publish to npm and Packagist within minutes, with a changelog to match.
+The `Coding Standards` workflow is check-only on `main`: it fails if eslint or php-cs-fixer would change files, and only auto-commits fixes on other branches.
+
+In short: merge Conventional Commits → merge the Release PR (creates tag + GitHub Release) → tests and lint/build pass → the chained jobs publish to npm and Packagist within minutes, with a changelog to match.
 
 ## One-time setup (do this once per registry)
 
