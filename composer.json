@@ -31,13 +31,24 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "PonchRobles\\InertiaTable\\Tests\\": "tests/"
+            "PonchRobles\\InertiaTable\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
         }
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
         "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
-        "php-cs-fixer": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --verbose"
+        "php-cs-fixer": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --verbose",
+        "demo:setup": [
+            "@php vendor/bin/testbench migrate:fresh"
+        ],
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php vendor/bin/testbench package:sync-skeleton",
+            "@php vendor/bin/testbench serve"
+        ]
     },
     "config": {
         "sort-packages": true

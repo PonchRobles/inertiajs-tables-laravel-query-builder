@@ -95,6 +95,20 @@ If the feature is client-side (a Vue prop, slot, or event), add it to the releva
 
 When in doubt, match the tone and structure of the surrounding section rather than inventing a new format.
 
+## Local demo
+
+A small Laravel + Inertia + Vue app (Orchestra Workbench, SQLite file under `workbench/`) runs the package from the local source (`js/` and `src/`, not `dist/`). It has the full table (global search, search rows, sorting, pagination, per page, reset, column toggle), every filter type, a page with two named tables, and an EN/ES language switcher that calls `setTranslations()` at runtime.
+
+First time (needs `composer install` and `npm install`):
+
+```bash
+npm run demo:build      # builds the demo assets into workbench/public/build
+composer demo:setup     # creates and seeds workbench/database/database.sqlite (about 100 products)
+composer serve          # serves the demo, usually on http://127.0.0.1:8000
+```
+
+Open `/products` (full table) or `/two-tables`. For hot reload, run `npm run demo:dev` in a second terminal instead of `demo:build`. Run `composer demo:setup` again to reset the data. The demo uses Tailwind CSS v3. The `workbench/` folder, `testbench.yaml` and the `*.workbench.config.js` files are not part of the npm or Composer packages.
+
 ## Releasing
 
 Releases to npm and Packagist are automated — see [RELEASING.md](RELEASING.md) for how it works and what one-time setup it requires.
