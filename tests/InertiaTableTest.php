@@ -195,6 +195,77 @@ class InertiaTableTest extends TestCase
         $this->assertNotNull($qb['globalSearch']);
     }
 
+    public function test_global_search_label_is_null_without_explicit_label(): void
+    {
+        $table = $this->createTable();
+        $table->withGlobalSearch();
+
+        $response = Inertia::render('Users/Index');
+        $table->applyTo($response);
+
+        $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+        $this->assertNull($qb['globalSearch']->label);
+        $this->assertNull($qb['globalSearch']->toArray()['label']);
+    }
+
+    public function test_global_search_explicit_label_is_sent_unchanged(): void
+    {
+        $table = $this->createTable();
+        $table->withGlobalSearch('Search users...');
+
+        $response = Inertia::render('Users/Index');
+        $table->applyTo($response);
+
+        $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+        $this->assertSame('Search users...', $qb['globalSearch']->label);
+    }
+
+    public function test_default_global_search_without_label_sends_null(): void
+    {
+        foreach ([fn () => InertiaTable::defaultGlobalSearch(), fn () => InertiaTable::defaultGlobalSearch(true)] as $enable) {
+            InertiaTable::resetDefaults();
+            $enable();
+
+            $table    = $this->createTable();
+            $response = Inertia::render('Users/Index');
+            $table->applyTo($response);
+
+            $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+            $this->assertNotNull($qb['globalSearch']);
+            $this->assertNull($qb['globalSearch']->label);
+        }
+    }
+
+    public function test_default_global_search_explicit_label_is_sent(): void
+    {
+        InertiaTable::defaultGlobalSearch('Find...');
+
+        $table    = $this->createTable();
+        $response = Inertia::render('Users/Index');
+        $table->applyTo($response);
+
+        $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+        $this->assertSame('Find...', $qb['globalSearch']->label);
+    }
+
+    public function test_default_global_search_false_disables_it(): void
+    {
+        InertiaTable::defaultGlobalSearch();
+        InertiaTable::defaultGlobalSearch(false);
+
+        $table    = $this->createTable();
+        $response = Inertia::render('Users/Index');
+        $table->applyTo($response);
+
+        $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+        $this->assertNull($qb['globalSearch']);
+    }
+
     public function test_table_macro_on_inertia_response(): void
     {
         $response = Inertia::render('Users/Index')

@@ -28,6 +28,7 @@ class InertiaTable
     private Collection $searchInputs;
     private Collection $filters;
 
+    /** false = disabled, true = enabled without a label, string = enabled with that label. */
     private static bool|string $defaultGlobalSearch = false;
     private static array $defaultQueryBuilderConfig = [];
 
@@ -39,16 +40,17 @@ class InertiaTable
         $this->filters      = new Collection();
 
         if (static::$defaultGlobalSearch !== false) {
-            $this->withGlobalSearch(static::$defaultGlobalSearch);
+            $this->withGlobalSearch(is_string(static::$defaultGlobalSearch) ? static::$defaultGlobalSearch : null);
         }
     }
 
     /**
-     * Set a default for global search.
+     * Set a default for global search. `false` disables it, `true` enables it without a label
+     * (the frontend then uses its `search` translation), a string enables it with that label.
      */
-    public static function defaultGlobalSearch(bool|string $label = 'Search...'): void
+    public static function defaultGlobalSearch(bool|string $label = true): void
     {
-        static::$defaultGlobalSearch = $label !== false ? __($label) : false;
+        static::$defaultGlobalSearch = is_string($label) ? __($label) : $label;
     }
 
     /**
@@ -325,7 +327,14 @@ class InertiaTable
      */
     public function withGlobalSearch(?string $label = null): self
     {
-        return $this->searchInput('global', $label ?: __('Search...'));
+        $this->searchInput('global', $label);
+
+        if (!$label) {
+            // No explicit label: send null so the frontend uses its `search` translation.
+            $this->searchInputs->firstWhere('key', 'global')->label = null;
+        }
+
+        return $this;
     }
 
     /**
