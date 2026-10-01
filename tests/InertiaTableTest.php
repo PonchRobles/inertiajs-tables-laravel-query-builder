@@ -379,6 +379,46 @@ class InertiaTableTest extends TestCase
         $this->assertSame(50, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => '50'])));
     }
 
+    public function test_per_page_reads_prefixed_param_for_named_table(): void
+    {
+        $request = Request::create('/', 'GET', ['users_perPage' => '50', 'posts_perPage' => '30']);
+
+        $this->assertSame(50, InertiaTable::perPage($request, [15, 30, 50], name: 'users'));
+        $this->assertSame(30, InertiaTable::perPage($request, [15, 30, 50], name: 'posts'));
+        $this->assertSame(15, InertiaTable::perPage($request, [15, 30, 50]));
+    }
+
+    public function test_per_page_named_table_prefers_prefixed_over_plain(): void
+    {
+        $request = Request::create('/', 'GET', ['perPage' => '30', 'users_perPage' => '50']);
+
+        $this->assertSame(50, InertiaTable::perPage($request, [15, 30, 50], name: 'users'));
+    }
+
+    public function test_per_page_named_table_falls_back_to_plain_param(): void
+    {
+        $request = Request::create('/', 'GET', ['perPage' => '30']);
+
+        $this->assertSame(30, InertiaTable::perPage($request, [15, 30, 50], name: 'users'));
+    }
+
+    public function test_per_page_named_table_validates_prefixed_value(): void
+    {
+        foreach (['-1', '0', 'abc', '20', '100000'] as $value) {
+            $request = Request::create('/', 'GET', ['users_perPage' => $value]);
+            $this->assertSame(15, InertiaTable::perPage($request, name: 'users'), "value: {$value}");
+        }
+
+        $this->assertSame(15, InertiaTable::perPage(Request::create('/', 'GET', ['users_perPage' => ['15']]), name: 'users'));
+    }
+
+    public function test_per_page_default_table_ignores_prefixed_param(): void
+    {
+        $request = Request::create('/', 'GET', ['users_perPage' => '50']);
+
+        $this->assertSame(15, InertiaTable::perPage($request));
+    }
+
     public function test_per_page_falls_back_for_invalid_values(): void
     {
         foreach (['-1', '0', 'abc', '15.5', '20', '', '100000'] as $value) {

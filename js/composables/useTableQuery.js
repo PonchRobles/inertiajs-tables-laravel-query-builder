@@ -142,7 +142,7 @@ export function useTableQuery(queryBuilderData, queryBuilderProps, tableName, pa
         const queryStringData = qs.parse(location.search.substring(1));
         const prefix = tableName.value === "default" ? "" : (tableName.value + "_");
 
-        for (const key of ["filter", "columns", "cursor", "sort"]) {
+        for (const key of ["filter", "columns", "cursor", "sort", "perPage"]) {
             delete queryStringData[prefix + key];
         }
 
@@ -153,7 +153,7 @@ export function useTableQuery(queryBuilderData, queryBuilderProps, tableName, pa
             if (key === "page") {
                 queryStringData[pageName.value] = value;
             } else if (key === "perPage") {
-                queryStringData.perPage = value;
+                queryStringData[prefix + "perPage"] = value;
             } else {
                 queryStringData[prefix + key] = value;
             }
