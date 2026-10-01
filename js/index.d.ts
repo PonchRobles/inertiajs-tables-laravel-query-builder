@@ -40,7 +40,8 @@ export interface Column {
 /** Mirrors `PonchRobles\InertiaTable\SearchInput::toArray()`. */
 export interface SearchInput {
     key: string;
-    label: string;
+    /** `null` for the global search input when no label was set on the backend. */
+    label: string | null;
     value: string | null;
 }
 

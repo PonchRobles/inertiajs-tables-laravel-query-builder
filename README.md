@@ -277,7 +277,7 @@ The server-side sorting is done **only** by `SortsNullsLast`: the `nullsLast` co
 
 #### Global Search
 
-You may enable Global Search with the `withGlobalSearch` method, and optionally specify a placeholder.
+You may enable Global Search with the `withGlobalSearch` method, and optionally specify a placeholder. Without a placeholder, the frontend uses the `search` translation (`"Search..."` by default, see [translations](#pagination-translations)), so you can change it with `setTranslations({ search: "..." })`. An explicit placeholder always wins. Laravel's `__('Search...')` is no longer applied automatically: translate it yourself or use `setTranslations`.
 
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
@@ -290,7 +290,7 @@ Inertia::render('Page/Index')->table(function (InertiaTable $table) {
 If you want to enable Global Search for every table by default, you may use the static `defaultGlobalSearch` method, for example, in the `AppServiceProvider` class:
 
 ```php
-InertiaTable::defaultGlobalSearch();
+InertiaTable::defaultGlobalSearch(); // enabled, placeholder comes from the `search` translation
 InertiaTable::defaultGlobalSearch('Default custom placeholder');
 InertiaTable::defaultGlobalSearch(false); // disable
 ```
@@ -594,7 +594,7 @@ setTranslations({
 
 `setTranslations` merges with the built-in defaults, so you only need to pass the keys you want to change: `setTranslations({ next: "Siguiente" })` keeps every other default. Each call starts again from the defaults (it does not accumulate previous overrides). To change a single key use `setTranslation("next", "Siguiente")`.
 
-The `search` key is the placeholder of the global search input. It is used when the `TableGlobalSearch` component receives no `label` prop; an explicit `label` always wins. Note that the `Table` component passes the label coming from the backend (`withGlobalSearch()` / `defaultGlobalSearch()`), so use those to set it per table.
+The `search` key is the placeholder of the global search input. It is used when the `TableGlobalSearch` component receives no `label` prop; an explicit `label` always wins. The `Table` component passes the label coming from the backend: without an explicit label in `withGlobalSearch()` / `defaultGlobalSearch()` the backend sends `null`, so this translation is used. An explicit backend label wins.
 
 #### Table.vue slots
 
