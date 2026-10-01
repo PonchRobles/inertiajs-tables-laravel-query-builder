@@ -138,6 +138,9 @@ import { getTranslations } from "../../translations.js";
 
 const translations = getTranslations();
 
+// Matches the default of Table's `inputDebounceMs`.
+const KEYBOARD_EMIT_DEBOUNCE_MS = 350;
+
 const emit = defineEmits(["update:modelValue"]);
 
 const props = defineProps({
@@ -147,7 +150,6 @@ const props = defineProps({
     prefix: { type: String, default: "" },
     suffix: { type: String, default: "" },
     step: { type: Number, default: 1 },
-    debounceMs: { type: Number, default: 350 },
     color: { type: String, default: "primary" },
     ui: { type: Object, default: undefined },
 });
@@ -284,7 +286,7 @@ function setHandleValue(isMin, value) {
     keyboardEmitTimeout = setTimeout(() => {
         keyboardEmitTimeout = null;
         emit("update:modelValue", [currentMinValue.value, currentMaxValue.value]);
-    }, props.debounceMs);
+    }, KEYBOARD_EMIT_DEBOUNCE_MS);
 }
 
 function handleKeyDown(event, isMin) {
