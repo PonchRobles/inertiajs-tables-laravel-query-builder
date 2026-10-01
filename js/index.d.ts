@@ -52,7 +52,7 @@ export interface SelectFilterData {
     type: "select";
     options: Record<string, string>;
     /** Options as a list: keeps the PHP order (JS objects reorder integer-like keys). */
-    ordered_options?: Array<{ value: string | number; label: string }>;
+    ordered_options?: Array<{ value: string; label: string }>;
     value: string | null;
 }
 
