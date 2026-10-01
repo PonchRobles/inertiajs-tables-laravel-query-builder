@@ -42,12 +42,29 @@ class MultiSelectFilter implements Filterable
     public function toArray(): array
     {
         return [
-            'key'     => $this->key,
-            'label'   => $this->label,
-            'options' => $this->options,
-            'value'   => $this->value,
-            'type'    => self::TYPE,
+            'key'             => $this->key,
+            'label'           => $this->label,
+            'options'         => $this->options,
+            'ordered_options' => $this->getOrderedOptions(),
+            'value'           => $this->value,
+            'type'            => self::TYPE,
         ];
+    }
+
+    /**
+     * Options as a list so the PHP order survives JSON (objects reorder integer-like keys in JS).
+     *
+     * @return array<int, array{value: int|string, label: string}>
+     */
+    protected function getOrderedOptions(): array
+    {
+        $ordered = [];
+
+        foreach ($this->options as $value => $label) {
+            $ordered[] = ['value' => $value, 'label' => $label];
+        }
+
+        return $ordered;
     }
 
     public static function getQueryBuilderFilter(string $column): AllowedFilter

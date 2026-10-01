@@ -85,6 +85,8 @@ Inertia::render('Page/Index')->table(function (InertiaTable $table) {
 });
 ```
 
+The filter's `toArray()` also returns `ordered_options`: a list of `{ value, label }` objects in the same order as your PHP array, including the *no filter* option (value `''`) when enabled. The `options` object is unchanged and kept for backward compatibility, but JavaScript reorders integer-like keys (e.g. `[3 => 'c', 1 => 'a']` becomes `1, 3`), so custom UIs should use `ordered_options` when order matters. For select filters `value` is always a string (integer keys arrive as `"3"`).
+
 The `selectFilter` will, by default, add a *no filter* option to the array. You may disable this or specify a custom label for it.
 
 ```php
@@ -173,6 +175,8 @@ Inertia::render('Page/Index')->table(function (InertiaTable $table) {
 	]);
 });
 ```
+
+The filter's `toArray()` also returns `ordered_options`: a list of `{ value, label }` objects in the same order as your PHP array. The `options` object is unchanged and kept for backward compatibility, but JavaScript reorders integer-like keys (e.g. `[3 => 'c', 1 => 'a']` becomes `1, 3`), so custom UIs should use `ordered_options` when order matters. `value` keeps the PHP key type, so integer keys arrive as JSON numbers.
 
 You may specify a custom label, a default value (an array of selected keys), and the *no filter* option, just like `selectFilter`.
 
