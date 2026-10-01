@@ -590,6 +590,7 @@ setTranslations({
   number_range_min: "Minimum value",
   number_range_max: "Maximum value",
   remove_search: "Remove search",
+  toggle: "Toggle",
 });
 ```
 

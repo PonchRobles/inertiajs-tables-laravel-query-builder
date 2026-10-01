@@ -175,6 +175,7 @@ export interface Translations {
     number_range_min?: string;
     number_range_max?: string;
     remove_search?: string;
+    toggle?: string;
     [key: string]: string | undefined;
 }
 

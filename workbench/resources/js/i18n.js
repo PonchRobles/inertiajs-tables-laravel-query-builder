@@ -20,6 +20,7 @@ const es = {
     number_range_min: "Valor minimo",
     number_range_max: "Valor maximo",
     remove_search: "Quitar búsqueda",
+    toggle: "Alternar",
 };
 
 export const languages = { en: "English", es: "Espanol" };
