@@ -174,6 +174,7 @@ export interface Translations {
     grouped_reset?: string;
     number_range_min?: string;
     number_range_max?: string;
+    remove_search?: string;
     [key: string]: string | undefined;
 }
 

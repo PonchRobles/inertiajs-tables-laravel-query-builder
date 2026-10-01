@@ -19,6 +19,7 @@ const defaultTranslations = Object.freeze({
     grouped_reset: "Reset",
     number_range_min: "Minimum value",
     number_range_max: "Maximum value",
+    remove_search: "Remove search",
 });
 
 // One stable reactive object: components read it at setup (`getTranslations()`) and, being reactive,
