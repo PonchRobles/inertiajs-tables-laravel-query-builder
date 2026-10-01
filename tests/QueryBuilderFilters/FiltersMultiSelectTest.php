@@ -50,12 +50,12 @@ class FiltersMultiSelectTest extends FilterTestCase
 
     public function test_value_containing_comma_matches_when_sent_as_array(): void
     {
-        $this->markTestIncomplete(
-            'Known bug (tracked in #51): a single option containing a comma (filter[category][]=a,b) is exploded by Spatie into a nested array, '
-            . 'and FiltersMultiSelect passes it to whereIn(), which throws InvalidArgumentException (Nested arrays may not be passed to whereIn method).'
-        );
-
         $this->assertSame(['E'], $this->names(['a,b']));
+    }
+
+    public function test_comma_value_can_be_mixed_with_plain_values(): void
+    {
+        $this->assertSame(['B', 'E'], $this->names(['a,b', 'games']));
     }
 
     public function test_unknown_value_returns_nothing(): void
