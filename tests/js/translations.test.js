@@ -2,8 +2,9 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import TableGlobalSearch from "../../js/Components/TableGlobalSearch.vue";
 import GroupedActions from "../../js/Components/GroupedActions.vue";
-import defaults, { getTranslations, setTranslations } from "../../js/translations.js";
+import defaults, { getTranslations, setTranslation, setTranslations } from "../../js/translations.js";
 
 vi.mock("@floating-ui/dom", () => ({
     computePosition: vi.fn(() => new Promise(() => {})),
@@ -39,7 +40,7 @@ const defaultKeys = Object.keys(defaults);
 const originalDefaults = { ...defaults };
 
 afterEach(() => {
-    setTranslations({ ...originalDefaults });
+    setTranslations({});
 });
 
 describe("translations", () => {
@@ -98,5 +99,54 @@ describe("translations", () => {
         expect(text).toContain("Anadir campo");
         expect(text).toContain("Mostrar u ocultar");
         expect(text).toContain("Restablecer");
+    });
+
+    it("a partial setTranslations keeps defaults for missing keys", () => {
+        setTranslations({ next: "Siguiente" });
+
+        expect(getTranslations().next).toBe("Siguiente");
+        expect(getTranslations().previous).toBe(originalDefaults.previous);
+        expect(getTranslations().of).toBe(originalDefaults.of);
+        expect(getTranslations().search).toBe(originalDefaults.search);
+    });
+
+    it("a full setTranslations overrides every key", () => {
+        const full = Object.fromEntries(defaultKeys.map((key) => [key, `x-${key}`]));
+        setTranslations(full);
+
+        expect(getTranslations()).toEqual(full);
+    });
+
+    it("setTranslations does not carry over overrides from a previous call", () => {
+        setTranslations({ next: "Siguiente" });
+        setTranslations({ previous: "Anterior" });
+
+        expect(getTranslations().next).toBe(originalDefaults.next);
+        expect(getTranslations().previous).toBe("Anterior");
+    });
+
+    it("setTranslation overrides a single key", () => {
+        setTranslation("next", "Siguiente");
+
+        expect(getTranslations().next).toBe("Siguiente");
+        expect(getTranslations().previous).toBe(originalDefaults.previous);
+    });
+
+    it("restores defaults between tests", () => {
+        expect(getTranslations()).toEqual(originalDefaults);
+    });
+
+    it("TableGlobalSearch uses the search translation as placeholder", () => {
+        setTranslations({ search: "Buscar..." });
+
+        const wrapper = mount(TableGlobalSearch, { props: { onChange: () => {} } });
+        expect(wrapper.find("input").attributes("placeholder")).toBe("Buscar...");
+    });
+
+    it("TableGlobalSearch label prop wins over the search translation", () => {
+        setTranslations({ search: "Buscar..." });
+
+        const wrapper = mount(TableGlobalSearch, { props: { label: "Find users", onChange: () => {} } });
+        expect(wrapper.find("input").attributes("placeholder")).toBe("Find users");
     });
 });

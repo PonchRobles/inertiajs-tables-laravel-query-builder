@@ -76,4 +76,4 @@ export declare const ToggleSwitch: DefineComponent;
 
 export declare function getTranslations(): Translations;
 export declare function setTranslation(key: string, value: string): void;
-export declare function setTranslations(translations: Translations): void;
+export declare function setTranslations(translations: Partial<Translations>): void;

@@ -568,6 +568,10 @@ setTranslations({
 });
 ```
 
+`setTranslations` merges with the built-in defaults, so you only need to pass the keys you want to change: `setTranslations({ next: "Siguiente" })` keeps every other default. Each call starts again from the defaults (it does not accumulate previous overrides). To change a single key use `setTranslation("next", "Siguiente")`.
+
+The `search` key is the placeholder of the global search input. It is used when the `TableGlobalSearch` component receives no `label` prop; an explicit `label` always wins. Note that the `Table` component passes the label coming from the backend (`withGlobalSearch()` / `defaultGlobalSearch()`), so use those to set it per table.
+
 #### Table.vue slots
 
 The `Table.vue` has several slots that you can use to inject your own implementations.
