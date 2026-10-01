@@ -217,6 +217,8 @@ export interface PaginationProps {
     /** @default () => {} */
     onPerPageChange?: (value: string) => void;
     hasData: boolean;
+    /** Show "No results found" when there is no data. `Table` passes false: its empty row shows it. @default true */
+    showEmptyMessage?: boolean;
     meta?: PaginationMeta;
     /** @default "primary" */
     color?: string;

@@ -72,7 +72,7 @@ h(ButtonWithDropdown, { placement: "bottom-end", active: true, dusk: null, disab
 h(GroupedActions, { actions: { reset: { onClick: () => {} }, toggleColumns: { show: true, columns: [column], onChange: (key, hidden) => void [key, hidden] } } });
 h(HeaderCell, { cell: { ...column, onSort: (key) => void key } });
 h(OnClickOutside, { do: () => {} });
-h(Pagination, { hasData: true, meta: { total: 1, per_page: 15, links: [] }, onClick: (url) => void url, perPageOptions: [10, 20] });
+h(Pagination, { hasData: true, meta: { total: 1, per_page: 15, links: [] }, onClick: (url) => void url, perPageOptions: [10, 20], showEmptyMessage: false });
 h(PerPageSelector, { onChange: (value) => void value, value: 30, options: [30, 60] });
 h(TableAddSearchRow, { searchInputs: [searchInput], hasSearchInputsWithoutValue: true, onAdd: (key) => void key });
 h(TableColumns, { columns: [column], hasHiddenColumns: false, onChange: (key, hidden) => void [key, hidden] });
@@ -106,3 +106,5 @@ const camelColumn: Column = { ...column, canBeHidden: true };
 void camelColumn;
 // @ts-expect-error perPageOptions must be numbers
 h(Pagination, { hasData: true, perPageOptions: ["10"] });
+// @ts-expect-error showEmptyMessage must be a boolean
+h(Pagination, { hasData: true, showEmptyMessage: "no" });
