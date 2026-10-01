@@ -36,7 +36,7 @@ export interface Filter {
     type: string;
     value: unknown;
     options?: Record<string, string>;
-    ordered_options?: Array<{ value: string; label: string }>;
+    ordered_options?: Array<{ value: string | number; label: string }>;
 }
 
 export interface Translations {
