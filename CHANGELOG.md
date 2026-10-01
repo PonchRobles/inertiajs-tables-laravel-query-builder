@@ -21,7 +21,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Updated build tooling to Vite 8 and ESLint 10.
 
 ### Fixed
-- `perPage` is now prefixed per named table (`{name}_perPage`); the default table keeps `perPage`. **Compatibility:** bookmarked URLs of named tables using `perPage` no longer apply on the frontend; `InertiaTable::perPage(name: ...)` still falls back to the unprefixed `perPage` for one release (deprecated).
 - Corrected file naming/location for filterable classes (previously under `#17`/`#18`).
 - Fixed missing translations for search and pagination labels.
 - Fixed the `perPageOptions` default in `Pagination.vue`, which returned a function instead of an array.

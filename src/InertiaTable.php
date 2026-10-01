@@ -79,8 +79,8 @@ class InertiaTable
      * When $name is given, `{name}_perPage` is read. If that parameter is absent,
      * the plain `perPage` parameter is used as a fallback.
      *
-     * @deprecated The fallback to the unprefixed `perPage` for named tables is
-     *             deprecated and will be removed in the next release.
+     * Note: the fallback to the unprefixed `perPage` for named tables is
+     * deprecated and will be removed in the next release.
      *
      * @param int[] $options
      *
