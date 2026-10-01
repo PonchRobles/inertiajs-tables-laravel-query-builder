@@ -23,6 +23,7 @@
         "dev": "vite build --watch",
         "build": "vite build && cp js/index.d.ts dist/index.d.ts",
         "lint": "eslint js/ tests/js/ --fix",
+        "typecheck": "tsc -p tsconfig.typecheck.json",
         "test": "vitest run",
         "test:watch": "vitest"
     },
@@ -41,6 +42,7 @@
         "eslint": "^10.11.0",
         "eslint-plugin-vue": "^10.11.1",
         "jsdom": "^30.1.1",
+        "typescript": "^7.0.2",
         "vite": "^8.3.1",
         "vitest": "^5.0.2",
         "vue": "^3.5.43"
