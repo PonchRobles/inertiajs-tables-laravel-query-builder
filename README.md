@@ -253,6 +253,28 @@ Inertia::render('Page/Index')->table(function (InertiaTable $table) {
 
 The `searchable` option is a shortcut to the `searchInput` method. The example below will essentially call `$table->searchInput('name', 'User Name')`.
 
+#### Sorting NULL values last
+
+Pass `nullsLast: true` to a sortable column and use the `SortsNullsLast` helper for the Spatie sort, so rows with a `NULL` value always come last, whatever the sort direction:
+
+```php
+use PonchRobles\InertiaTable\QueryBuilderSorts\SortsNullsLast;
+
+$users = QueryBuilder::for(User::class)
+	->allowedSorts(
+		SortsNullsLast::getQueryBuilderSort('last_login_at'),
+		SortsNullsLast::getQueryBuilderSort('name', 'users.name'), // sort name, database column
+		'email', // columns without the helper behave as before
+	)
+	->paginate();
+
+Inertia::render('Users/Index', ['users' => $users])->table(function (InertiaTable $table) {
+	$table->column('last_login_at', sortable: true, nullsLast: true);
+});
+```
+
+The server-side sorting is done **only** by `SortsNullsLast`: the `nullsLast` column option does not change the query by itself, it is exposed to the frontend as `nulls_last` in the column props. The helper orders by `column IS NULL` and then by the column, which works on MySQL, PostgreSQL and SQLite (it does not use the `NULLS LAST` syntax). The column name comes from your `allowedSorts` definition, never from the request, and is quoted by the query grammar.
+
 #### Global Search
 
 You may enable Global Search with the `withGlobalSearch` method, and optionally specify a placeholder.

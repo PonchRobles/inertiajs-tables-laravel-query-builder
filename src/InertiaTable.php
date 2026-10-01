@@ -296,6 +296,7 @@ class InertiaTable
         bool $hidden = false,
         bool $sortable = false,
         bool $searchable = false,
+        bool $nullsLast = false,
     ): self {
         $key   = $key ?: Str::kebab($label);
         $label = $label ?: Str::headline($key);
@@ -309,6 +310,7 @@ class InertiaTable
             hidden: $hidden,
             sortable: $sortable,
             sorted: false,
+            nullsLast: $nullsLast,
         ))->values();
 
         if ($searchable) {
