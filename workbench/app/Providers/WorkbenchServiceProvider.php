@@ -2,6 +2,7 @@
 
 namespace Workbench\App\Providers;
 
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -31,6 +32,12 @@ class WorkbenchServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // The language switcher sets this cookie from JavaScript, so it is not encrypted.
+        EncryptCookies::except('demo_locale');
+
+        // Server-side labels of the demo (columns, filters, options, page texts): __('demo::demo.*').
+        $this->loadTranslationsFrom(package_path('workbench/lang'), 'demo');
+
         // `npm run demo:dev` writes the hot file here; builds are symlinked to public/build (see testbench.yaml).
         Vite::useHotFile(package_path('workbench/public/hot'));
         Vite::useBuildDirectory('build');

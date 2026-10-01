@@ -57,8 +57,11 @@ class ProductController
             ->paginate(InertiaTable::perPage(options: self::PER_PAGE_OPTIONS, default: 10))
             ->withQueryString();
 
-        $categories = array_combine(ProductFactory::CATEGORIES, array_map('ucfirst', ProductFactory::CATEGORIES));
-        $brands     = array_combine(ProductFactory::BRANDS, ProductFactory::BRANDS);
+        $categories = array_combine(
+            ProductFactory::CATEGORIES,
+            array_map(fn (string $category) => __("demo::demo.categories.{$category}"), ProductFactory::CATEGORIES),
+        );
+        $brands = array_combine(ProductFactory::BRANDS, ProductFactory::BRANDS);
 
         return Inertia::render('Products/Index', ['products' => $products])
             ->table(function (InertiaTable $table) use ($categories, $brands) {
@@ -66,18 +69,18 @@ class ProductController
                     ->withGlobalSearch()
                     ->defaultSort('name')
                     ->perPageOptions(self::PER_PAGE_OPTIONS)
-                    ->column(key: 'name', label: 'Name', canBeHidden: false, sortable: true, searchable: true)
-                    ->column(key: 'category', label: 'Category', sortable: true)
-                    ->column(key: 'brand', label: 'Brand', hidden: true, sortable: true) // hidden by default
-                    ->column(key: 'price', label: 'Price', sortable: true)
-                    ->column(key: 'stock', label: 'Stock', sortable: true, nullsLast: true)
-                    ->column(key: 'is_active', label: 'Active')
-                    ->column(key: 'released_at', label: 'Released', sortable: true, nullsLast: true)
-                    ->selectFilter(key: 'category', options: $categories, label: 'Category')
-                    ->multiSelectFilter(key: 'brand', options: $brands, label: 'Brand')
-                    ->toggleFilter(key: 'is_active', label: 'Active')
-                    ->numberRangeFilter(key: 'price', max: 1000, prefix: '$', label: 'Price')
-                    ->dateRangeFilter(key: 'released_at', label: 'Released');
+                    ->column(key: 'name', label: __('demo::demo.columns.name'), canBeHidden: false, sortable: true, searchable: true)
+                    ->column(key: 'category', label: __('demo::demo.columns.category'), sortable: true)
+                    ->column(key: 'brand', label: __('demo::demo.columns.brand'), hidden: true, sortable: true) // hidden by default
+                    ->column(key: 'price', label: __('demo::demo.columns.price'), sortable: true)
+                    ->column(key: 'stock', label: __('demo::demo.columns.stock'), sortable: true, nullsLast: true)
+                    ->column(key: 'is_active', label: __('demo::demo.columns.is_active'))
+                    ->column(key: 'released_at', label: __('demo::demo.columns.released_at'), sortable: true, nullsLast: true)
+                    ->selectFilter(key: 'category', options: $categories, label: __('demo::demo.columns.category'))
+                    ->multiSelectFilter(key: 'brand', options: $brands, label: __('demo::demo.columns.brand'))
+                    ->toggleFilter(key: 'is_active', label: __('demo::demo.columns.is_active'))
+                    ->numberRangeFilter(key: 'price', max: 1000, prefix: '$', label: __('demo::demo.columns.price'))
+                    ->dateRangeFilter(key: 'released_at', label: __('demo::demo.columns.released_at'));
             });
     }
 
@@ -111,16 +114,16 @@ class ProductController
                     ->pageName('gadgetsPage')
                     ->defaultSort('name')
                     ->perPageOptions([5, 10, 25])
-                    ->column(key: 'name', label: 'Name', canBeHidden: false, sortable: true, searchable: true)
-                    ->column(key: 'price', label: 'Price', sortable: true);
+                    ->column(key: 'name', label: __('demo::demo.columns.name'), canBeHidden: false, sortable: true, searchable: true)
+                    ->column(key: 'price', label: __('demo::demo.columns.price'), sortable: true);
             })->table(function (InertiaTable $table) {
                 $table
                     ->name('household')
                     ->pageName('householdPage')
                     ->defaultSort('name')
                     ->perPageOptions([5, 10, 25])
-                    ->column(key: 'name', label: 'Name', canBeHidden: false, sortable: true, searchable: true)
-                    ->column(key: 'price', label: 'Price', sortable: true);
+                    ->column(key: 'name', label: __('demo::demo.columns.name'), canBeHidden: false, sortable: true, searchable: true)
+                    ->column(key: 'price', label: __('demo::demo.columns.price'), sortable: true);
             });
     }
 }

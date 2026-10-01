@@ -6,19 +6,19 @@
           href="/products"
           class="text-indigo-600 hover:underline"
         >
-          Full table
+          {{ $page.props.demo.full_table }}
         </Link>
         <Link
           href="/two-tables"
           class="text-indigo-600 hover:underline"
         >
-          Two named tables
+          {{ $page.props.demo.two_tables }}
         </Link>
       </nav>
       <label class="flex items-center gap-2 text-sm">
-        Language
+        {{ $page.props.demo.language }}
         <select
-          :value="language"
+          :value="$page.props.locale"
           class="rounded-md border-gray-300 text-sm"
           @change="changeLanguage($event.target.value)"
         >
@@ -37,30 +37,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { Link } from "@inertiajs/vue3";
+import { watch } from "vue";
+import { Link, router, usePage } from "@inertiajs/vue3";
 import { languages, applyLanguage } from "../i18n.js";
 
-const language = ref("en");
+const page = usePage();
+
+// The server locale (cookie + middleware) is the single source of truth: it drives the package
+// strings on the first load and after every visit, so a reload keeps the selected language.
+watch(() => page.props.locale, (locale) => applyLanguage(locale), { immediate: true });
 
 function changeLanguage(code) {
-    language.value = code;
-    applyLanguage(code);
-    try {
-        localStorage.setItem("demo-language", code);
-    } catch {
-        // storage is optional
-    }
+    document.cookie = `demo_locale=${code}; path=/; max-age=31536000; SameSite=Lax`;
+    // Reload the current URL (query string included) so the server labels are rendered again.
+    router.reload();
 }
-
-onMounted(() => {
-    try {
-        const saved = localStorage.getItem("demo-language");
-        if (saved && saved in languages) {
-            changeLanguage(saved);
-        }
-    } catch {
-        // storage is optional
-    }
-});
 </script>
