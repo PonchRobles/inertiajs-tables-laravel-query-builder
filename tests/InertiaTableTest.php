@@ -195,6 +195,77 @@ class InertiaTableTest extends TestCase
         $this->assertNotNull($qb['globalSearch']);
     }
 
+    public function test_global_search_label_is_null_without_explicit_label(): void
+    {
+        $table = $this->createTable();
+        $table->withGlobalSearch();
+
+        $response = Inertia::render('Users/Index');
+        $table->applyTo($response);
+
+        $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+        $this->assertNull($qb['globalSearch']->label);
+        $this->assertNull($qb['globalSearch']->toArray()['label']);
+    }
+
+    public function test_global_search_explicit_label_is_sent_unchanged(): void
+    {
+        $table = $this->createTable();
+        $table->withGlobalSearch('Search users...');
+
+        $response = Inertia::render('Users/Index');
+        $table->applyTo($response);
+
+        $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+        $this->assertSame('Search users...', $qb['globalSearch']->label);
+    }
+
+    public function test_default_global_search_without_label_sends_null(): void
+    {
+        foreach ([fn () => InertiaTable::defaultGlobalSearch(), fn () => InertiaTable::defaultGlobalSearch(true)] as $enable) {
+            InertiaTable::resetDefaults();
+            $enable();
+
+            $table    = $this->createTable();
+            $response = Inertia::render('Users/Index');
+            $table->applyTo($response);
+
+            $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+            $this->assertNotNull($qb['globalSearch']);
+            $this->assertNull($qb['globalSearch']->label);
+        }
+    }
+
+    public function test_default_global_search_explicit_label_is_sent(): void
+    {
+        InertiaTable::defaultGlobalSearch('Find...');
+
+        $table    = $this->createTable();
+        $response = Inertia::render('Users/Index');
+        $table->applyTo($response);
+
+        $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+        $this->assertSame('Find...', $qb['globalSearch']->label);
+    }
+
+    public function test_default_global_search_false_disables_it(): void
+    {
+        InertiaTable::defaultGlobalSearch();
+        InertiaTable::defaultGlobalSearch(false);
+
+        $table    = $this->createTable();
+        $response = Inertia::render('Users/Index');
+        $table->applyTo($response);
+
+        $qb = $this->getProps($response)['queryBuilderProps']['default'];
+
+        $this->assertNull($qb['globalSearch']);
+    }
+
     public function test_table_macro_on_inertia_response(): void
     {
         $response = Inertia::render('Users/Index')
@@ -372,5 +443,98 @@ class InertiaTableTest extends TestCase
 
         $this->assertEquals(['php', 'vue'], $qb['filters'][0]->getValue());
         $this->assertTrue($qb['hasEnabledFilters']);
+    }
+
+    public function test_per_page_returns_valid_value_from_options(): void
+    {
+        $this->assertSame(50, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => '50'])));
+    }
+
+    public function test_per_page_reads_prefixed_param_for_named_table(): void
+    {
+        $request = Request::create('/', 'GET', ['users_perPage' => '50', 'posts_perPage' => '30']);
+
+        $this->assertSame(50, InertiaTable::perPage($request, [15, 30, 50], name: 'users'));
+        $this->assertSame(30, InertiaTable::perPage($request, [15, 30, 50], name: 'posts'));
+        $this->assertSame(15, InertiaTable::perPage($request, [15, 30, 50]));
+    }
+
+    public function test_per_page_named_table_prefers_prefixed_over_plain(): void
+    {
+        $request = Request::create('/', 'GET', ['perPage' => '30', 'users_perPage' => '50']);
+
+        $this->assertSame(50, InertiaTable::perPage($request, [15, 30, 50], name: 'users'));
+    }
+
+    public function test_per_page_named_table_falls_back_to_plain_param(): void
+    {
+        $request = Request::create('/', 'GET', ['perPage' => '30']);
+
+        $this->assertSame(30, InertiaTable::perPage($request, [15, 30, 50], name: 'users'));
+    }
+
+    public function test_per_page_named_table_validates_prefixed_value(): void
+    {
+        foreach (['-1', '0', 'abc', '20', '100000'] as $value) {
+            $request = Request::create('/', 'GET', ['users_perPage' => $value]);
+            $this->assertSame(15, InertiaTable::perPage($request, name: 'users'), "value: {$value}");
+        }
+
+        $this->assertSame(15, InertiaTable::perPage(Request::create('/', 'GET', ['users_perPage' => ['15']]), name: 'users'));
+    }
+
+    public function test_per_page_default_table_ignores_prefixed_param(): void
+    {
+        $request = Request::create('/', 'GET', ['users_perPage' => '50']);
+
+        $this->assertSame(15, InertiaTable::perPage($request));
+    }
+
+    public function test_per_page_falls_back_for_invalid_values(): void
+    {
+        foreach (['-1', '0', 'abc', '15.5', '20', '', '100000'] as $value) {
+            $this->assertSame(15, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => $value])), "value: {$value}");
+        }
+    }
+
+    public function test_per_page_falls_back_for_array_value(): void
+    {
+        $this->assertSame(15, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => ['15']])));
+    }
+
+    public function test_per_page_falls_back_when_param_is_missing(): void
+    {
+        $this->assertSame(15, InertiaTable::perPage(Request::create('/')));
+    }
+
+    public function test_per_page_supports_custom_options_and_default(): void
+    {
+        $request = Request::create('/', 'GET', ['perPage' => '25']);
+
+        $this->assertSame(25, InertiaTable::perPage($request, [10, 25]));
+        $this->assertSame(10, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => '15']), [10, 25]));
+        $this->assertSame(25, InertiaTable::perPage(Request::create('/', 'GET', ['perPage' => '15']), [10, 25], 25));
+    }
+
+    public function test_per_page_ignores_prefixed_param(): void
+    {
+        $request = Request::create('/', 'GET', ['perPage' => '30', 'users_perPage' => '100']);
+
+        $this->assertSame(30, InertiaTable::perPage($request));
+        $this->assertSame(15, InertiaTable::perPage(Request::create('/', 'GET', ['users_perPage' => '100'])));
+    }
+
+    public function test_per_page_uses_current_request_when_none_given(): void
+    {
+        $this->app->instance('request', Request::create('/', 'GET', ['perPage' => '30']));
+
+        $this->assertSame(30, InertiaTable::perPage());
+    }
+
+    public function test_per_page_throws_for_empty_options(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        InertiaTable::perPage(Request::create('/'), []);
     }
 }

@@ -8,7 +8,7 @@ class SearchInput implements Arrayable
 {
     public function __construct(
         public string $key,
-        public string $label,
+        public ?string $label,
         public ?string $value = null,
     ) {
     }

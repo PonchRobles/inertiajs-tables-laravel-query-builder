@@ -3,7 +3,7 @@
     v-if="hasPagination"
     :class="getTheme('nav')"
   >
-    <p v-if="!hasData || pagination.total < 1">
+    <p v-if="showEmptyMessage && (!hasData || pagination.total < 1)">
       {{ translations.no_results_found }}
     </p>
 
@@ -202,6 +202,7 @@ const props = defineProps({
         default() { return () => {}; },
     },
     hasData: { type: Boolean, required: true },
+    showEmptyMessage: { type: Boolean, default: true },
     meta: { type: Object },
     color: { type: String, default: "primary" },
     ui: { type: Object, default: undefined },

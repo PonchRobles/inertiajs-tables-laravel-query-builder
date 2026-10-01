@@ -253,9 +253,31 @@ Inertia::render('Page/Index')->table(function (InertiaTable $table) {
 
 The `searchable` option is a shortcut to the `searchInput` method. The example below will essentially call `$table->searchInput('name', 'User Name')`.
 
+#### Sorting NULL values last
+
+Pass `nullsLast: true` to a sortable column and use the `SortsNullsLast` helper for the Spatie sort, so rows with a `NULL` value always come last, whatever the sort direction:
+
+```php
+use PonchRobles\InertiaTable\QueryBuilderSorts\SortsNullsLast;
+
+$users = QueryBuilder::for(User::class)
+	->allowedSorts(
+		SortsNullsLast::getQueryBuilderSort('last_login_at'),
+		SortsNullsLast::getQueryBuilderSort('name', 'users.name'), // sort name, database column
+		'email', // columns without the helper behave as before
+	)
+	->paginate();
+
+Inertia::render('Users/Index', ['users' => $users])->table(function (InertiaTable $table) {
+	$table->column('last_login_at', sortable: true, nullsLast: true);
+});
+```
+
+The server-side sorting is done **only** by `SortsNullsLast`: the `nullsLast` column option does not change the query by itself, it is exposed to the frontend as `nulls_last` in the column props. The helper orders by `column IS NULL` and then by the column, which works on MySQL, PostgreSQL and SQLite (it does not use the `NULLS LAST` syntax). The column name comes from your `allowedSorts` definition, never from the request, and is quoted by the query grammar.
+
 #### Global Search
 
-You may enable Global Search with the `withGlobalSearch` method, and optionally specify a placeholder.
+You may enable Global Search with the `withGlobalSearch` method, and optionally specify a placeholder. Without a placeholder, the frontend uses the `search` translation (`"Search..."` by default, see [translations](#pagination-translations)), so you can change it with `setTranslations({ search: "..." })`. An explicit placeholder always wins. Laravel's `__('Search...')` is no longer applied automatically: translate it yourself or use `setTranslations`.
 
 ```php
 Inertia::render('Page/Index')->table(function (InertiaTable $table) {
@@ -268,7 +290,7 @@ Inertia::render('Page/Index')->table(function (InertiaTable $table) {
 If you want to enable Global Search for every table by default, you may use the static `defaultGlobalSearch` method, for example, in the `AppServiceProvider` class:
 
 ```php
-InertiaTable::defaultGlobalSearch();
+InertiaTable::defaultGlobalSearch(); // enabled, placeholder comes from the `search` translation
 InertiaTable::defaultGlobalSearch('Default custom placeholder');
 InertiaTable::defaultGlobalSearch(false); // disable
 ```
@@ -305,7 +327,7 @@ class UserIndexController
 			->defaultSort('name')
 			->allowedSorts(['name', 'email', 'language_code'])
 			->allowedFilters(['name', 'email', 'language_code', $globalSearch])
-			->paginate()
+			->paginate(InertiaTable::perPage())
 			->withQueryString();
 
 		return Inertia::render('Users/Index', [
@@ -324,6 +346,31 @@ class UserIndexController
 			  ]);
 	}
 }
+```
+
+#### Validating the per-page value
+
+The `perPage` query parameter comes from the user, so never pass it straight to `paginate()`: values like `-1`, `0`, `abc` or `100000` would reach your database. Use the static `InertiaTable::perPage()` helper instead. It returns the requested value only if it is an integer that is present in the allowed options, and otherwise falls back to a default.
+
+```php
+InertiaTable::perPage(
+	?Request $request = null,          // defaults to the current request
+	array $options = [15, 30, 50, 100], // allowed values
+	?int $default = null,              // fallback, defaults to the first option
+	?string $name = null,              // name of the table, see below
+): int
+```
+
+- Only whole positive numbers in `$options` are accepted; `-1`, `0`, `abc`, `15.5` and values not in the options all fall back to `$default ?? $options[0]`.
+- The default (unnamed) table uses the plain `perPage` parameter. A named table (`InertiaTable::updateQueryBuilderParameters('users')`) uses `{name}_perPage`, so several tables on one page keep independent values. Pass the table name: `InertiaTable::perPage(name: 'users')`.
+- **Deprecated:** if `{name}_perPage` is absent, the helper falls back to the unprefixed `perPage` so that existing bookmarked URLs keep working. This fallback exists for one release only and will be removed; the frontend now only sends `{name}_perPage` for named tables.
+- Passing an empty `$options` array throws an `InvalidArgumentException`.
+- Keep the options in sync with the ones sent to the frontend, e.g. `perPageOptions([10, 25, 50])` together with `InertiaTable::perPage(options: [10, 25, 50])`.
+
+```php
+$users = QueryBuilder::for(User::class)
+	->paginate(InertiaTable::perPage(options: [10, 25, 50], default: 25))
+	->withQueryString();
 ```
 
 ### Client-side installation (Inertia)
@@ -540,8 +587,16 @@ setTranslations({
   grouped_reset: "Reset",
   add_search_fields: "Add search field",
   show_hide_columns: "Show / Hide columns",
+  number_range_min: "Minimum value",
+  number_range_max: "Maximum value",
+  remove_search: "Remove search",
+  toggle: "Toggle",
 });
 ```
+
+`setTranslations` merges with the built-in defaults, so you only need to pass the keys you want to change: `setTranslations({ next: "Siguiente" })` keeps every other default. Each call starts again from the defaults (it does not accumulate previous overrides). To change a single key use `setTranslation("next", "Siguiente")`.
+
+The `search` key is the placeholder of the global search input. It is used when the `TableGlobalSearch` component receives no `label` prop; an explicit `label` always wins. The `Table` component passes the label coming from the backend: without an explicit label in `withGlobalSearch()` / `defaultGlobalSearch()` the backend sends `null`, so this translation is used. An explicit backend label wins.
 
 #### Table.vue slots
 

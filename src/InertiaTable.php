@@ -16,9 +16,11 @@ use PonchRobles\InertiaTable\Filters\ToggleFilter;
 
 class InertiaTable
 {
+    public const DEFAULT_PER_PAGE_OPTIONS = [15, 30, 50, 100];
+
     private string $name          = 'default';
     private string $pageName      = 'page';
-    private array $perPageOptions = [15, 30, 50, 100];
+    private array $perPageOptions = self::DEFAULT_PER_PAGE_OPTIONS;
     private string $defaultSort   = '';
 
     private Request $request;
@@ -26,6 +28,7 @@ class InertiaTable
     private Collection $searchInputs;
     private Collection $filters;
 
+    /** false = disabled, true = enabled without a label, string = enabled with that label. */
     private static bool|string $defaultGlobalSearch = false;
     private static array $defaultQueryBuilderConfig = [];
 
@@ -37,16 +40,17 @@ class InertiaTable
         $this->filters      = new Collection();
 
         if (static::$defaultGlobalSearch !== false) {
-            $this->withGlobalSearch(static::$defaultGlobalSearch);
+            $this->withGlobalSearch(is_string(static::$defaultGlobalSearch) ? static::$defaultGlobalSearch : null);
         }
     }
 
     /**
-     * Set a default for global search.
+     * Set a default for global search. `false` disables it, `true` enables it without a label
+     * (the frontend then uses its `search` translation), a string enables it with that label.
      */
-    public static function defaultGlobalSearch(bool|string $label = 'Search...'): void
+    public static function defaultGlobalSearch(bool|string $label = true): void
     {
-        static::$defaultGlobalSearch = $label !== false ? __($label) : false;
+        static::$defaultGlobalSearch = is_string($label) ? __($label) : $label;
     }
 
     /**
@@ -67,6 +71,53 @@ class InertiaTable
             $this->name === 'default' ? $key : "{$this->name}_{$key}",
             $default
         );
+    }
+
+    /**
+     * Resolve a validated per-page value from the request. Returns the requested
+     * value only if it is an integer present in $options, otherwise $default
+     * (or the first option when no default is given).
+     *
+     * When $name is given, `{name}_perPage` is read. If that parameter is absent,
+     * the plain `perPage` parameter is used as a fallback.
+     *
+     * Note: the fallback to the unprefixed `perPage` for named tables is
+     * deprecated and will be removed in the next release.
+     *
+     * @param int[] $options
+     *
+     * @throws \InvalidArgumentException when $options is empty
+     */
+    public static function perPage(
+        ?Request $request = null,
+        array $options = self::DEFAULT_PER_PAGE_OPTIONS,
+        ?int $default = null,
+        ?string $name = null,
+    ): int {
+        if ($options === []) {
+            throw new \InvalidArgumentException('The per page options must not be empty.');
+        }
+
+        $options = array_values($options);
+        $request ??= request();
+
+        $value = $request->query('perPage');
+
+        if ($name !== null && $name !== '' && $name !== 'default') {
+            // DEPRECATED: falling back to the unprefixed `perPage` for named tables
+            // is kept for one release only, to ease migration of existing URLs.
+            $value = $request->query("{$name}_perPage", $value);
+        }
+
+        if (is_string($value) && preg_match('/^[1-9][0-9]*$/', $value) === 1) {
+            $value = (int) $value;
+
+            if (in_array($value, $options, true)) {
+                return $value;
+            }
+        }
+
+        return $default ?? $options[0];
     }
 
     /**
@@ -247,6 +298,7 @@ class InertiaTable
         bool $hidden = false,
         bool $sortable = false,
         bool $searchable = false,
+        bool $nullsLast = false,
     ): self {
         $key   = $key ?: Str::kebab($label);
         $label = $label ?: Str::headline($key);
@@ -260,6 +312,7 @@ class InertiaTable
             hidden: $hidden,
             sortable: $sortable,
             sorted: false,
+            nullsLast: $nullsLast,
         ))->values();
 
         if ($searchable) {
@@ -274,7 +327,14 @@ class InertiaTable
      */
     public function withGlobalSearch(?string $label = null): self
     {
-        return $this->searchInput('global', $label ?: __('Search...'));
+        $this->searchInput('global', $label);
+
+        if (!$label) {
+            // No explicit label: send null so the frontend uses its `search` translation.
+            $this->searchInputs->firstWhere('key', 'global')->label = null;
+        }
+
+        return $this;
     }
 
     /**

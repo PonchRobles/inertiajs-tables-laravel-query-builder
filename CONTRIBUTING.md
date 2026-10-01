@@ -39,12 +39,13 @@ Before submitting a pull request:
 ## Workflow
 
 1. **Start from an issue.** Every change starts from an issue with one `priority: P1`-`P4` label, one `type: *` label and a milestone (see [Labels](#labels) and [Milestones](#milestones)).
-2. **Branch from `main`** using `feature/<issue>-<slug>`, `fix/<issue>-<slug>` or `chore/<issue>-<slug>`.
+2. **Branch from the milestone branch.** Each milestone has an integration branch, `milestone/<name>`, created from `main`. Create issue branches from it using `feature/<issue>-<slug>`, `fix/<issue>-<slug>`, `chore/<issue>-<slug>`, `docs/<issue>-<slug>` or `test/<issue>-<slug>`.
 3. **Use [Conventional Commits](https://www.conventionalcommits.org/)** for commits and the PR title; release-please derives versions and the changelog from them.
-4. **Open a PR against `main`** with `Closes #<issue>` in the description. CI must be green.
+4. **Open a PR against `milestone/<name>`**, not `main`, with `Closes #<issue>` in the description. CI must be green. Tests are required when the change is testable (PHPUnit for `src/`, Vitest for `js/`).
 5. **Merge with rebase or a merge commit, never squash**, so each commit stays meaningful.
-6. **Releases:** release-please keeps a release PR open. Leave it open until every issue in the current milestone is closed, then merge it to publish one release (npm + Packagist). See [RELEASING.md](RELEASING.md).
-7. **Track progress** on the GitHub Project board, with the columns Todo / In progress / In review / Done.
+6. **Close out the milestone:** `Closes #<issue>` only auto-closes issues on merge to `main`, so the final `milestone/<name>` → `main` PR lists every issue in the milestone (`Closes #A, Closes #B, ...`).
+7. **Releases:** merging the final `milestone/<name>` → `main` PR triggers release-please, which publishes one release per milestone (npm + Packagist). See [RELEASING.md](RELEASING.md).
+8. **Track progress** on the GitHub Project board, with the columns Todo / In progress / In review / Done.
 
 ### Labels
 
@@ -58,7 +59,7 @@ Before submitting a pull request:
 
 ### Milestones
 
-Use one milestone per batch of work; everything in a milestone is released together.
+Use one milestone per batch of work, with one `milestone/<name>` integration branch; everything in a milestone is merged to `main` and released together.
 
 ## Requirements
 
@@ -66,7 +67,7 @@ If the project maintainer has any additional requirements, you will find them li
 
 - **[PSR-2 Coding Standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md)** - The easiest way to apply the conventions is to install [PHP Code Sniffer](https://pear.php.net/package/PHP_CodeSniffer).
 
-- **Add tests!** - Your patch won't be accepted if it doesn't have tests.
+- **Add tests!** - Your patch won't be accepted if it doesn't have tests. PHP tests run with `composer test`; JavaScript tests (Vitest, in `tests/js/`) run with `npm test`.
 
 - **Document every feature** - See [Documentation](#documentation) below; a PR that adds or changes public behavior without matching documentation will not be merged.
 
@@ -93,6 +94,22 @@ Follow the existing pattern used for each filter (e.g. `#### Select Filters`, `#
 If the feature is client-side (a Vue prop, slot, or event), add it to the relevant table (e.g. the `Table` properties table or the `Table.vue` slots table) *and* show a short template snippet demonstrating it, consistent with how `#### Table.vue slots` and `#### Custom column cells` are documented today.
 
 When in doubt, match the tone and structure of the surrounding section rather than inventing a new format.
+
+## Local demo
+
+A small Laravel + Inertia + Vue app (Orchestra Workbench, SQLite file under `workbench/`) runs the package from the local source (`js/` and `src/`, not `dist/`). It has the full table (global search, search rows, sorting, pagination, per page, reset, column toggle), every filter type, a page with two named tables, and an EN/ES language switcher that calls `setTranslations()` at runtime.
+
+First time (needs `composer install` and `npm install`):
+
+```bash
+npm run demo:build      # builds the demo assets into workbench/public/build
+composer demo:setup     # creates and seeds workbench/database/database.sqlite (about 100 products)
+composer serve          # serves the demo, usually on http://127.0.0.1:8000
+```
+
+Open `/products` (full table) or `/two-tables`. For hot reload, run `npm run demo:dev` in a second terminal instead of `demo:build`. Run `composer demo:setup` again to reset the data. The language switcher stores the locale in a `demo_locale` cookie that a workbench middleware applies on the server: column, filter and option labels and the page texts are translated server-side (`workbench/lang/en` and `es`), while `setTranslations()` covers the package's own strings, driven by the same locale.
+
+The demo uses Tailwind CSS v3. The `workbench/` folder, `testbench.yaml` and the `*.workbench.config.js` files are not part of the npm or Composer packages.
 
 ## Releasing
 

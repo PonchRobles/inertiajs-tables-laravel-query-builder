@@ -13,6 +13,7 @@ class Column implements Arrayable
         public bool $hidden = false,
         public bool $sortable = false,
         public bool|string $sorted = false,
+        public bool $nullsLast = false,
     ) {
     }
 
@@ -25,6 +26,7 @@ class Column implements Arrayable
             'hidden'        => $this->hidden,
             'sortable'      => $this->sortable,
             'sorted'        => $this->sorted,
+            'nulls_last'    => $this->nullsLast,
         ];
     }
 }

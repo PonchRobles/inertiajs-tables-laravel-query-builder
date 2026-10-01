@@ -4,7 +4,7 @@
       <label
         :for="`${filter.key}-start`"
         class="text-xs text-gray-500 whitespace-nowrap"
-      >{{ translations.start_date ?? 'Start date' }}</label>
+      >{{ translations.start_date }}</label>
       <input
         :id="`${filter.key}-start`"
         type="date"
@@ -19,7 +19,7 @@
       <label
         :for="`${filter.key}-end`"
         class="text-xs text-gray-500 whitespace-nowrap"
-      >{{ translations.end_date ?? 'End date' }}</label>
+      >{{ translations.end_date }}</label>
       <input
         :id="`${filter.key}-end`"
         type="date"

@@ -217,6 +217,7 @@
             <Pagination
               :on-click="visitPageFromUrl"
               :has-data="hasData"
+              :show-empty-message="false"
               :meta="resourceMeta"
               :per-page-options="queryBuilderProps.perPageOptions"
               :on-per-page-change="onPerPageChange"
