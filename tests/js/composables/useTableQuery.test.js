@@ -1,5 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { ref } from "vue";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { ref, reactive } from "vue";
+const { usePage } = vi.hoisted(() => ({ usePage: vi.fn() }));
+vi.mock("@inertiajs/vue3", () => ({ usePage }));
+
 import { useTableQuery } from "../../../js/composables/useTableQuery.js";
 
 function setup({ data = {}, props = {}, name = "default", pageName = "page", forced = [] } = {}) {
@@ -29,8 +32,13 @@ function setup({ data = {}, props = {}, name = "default", pageName = "page", for
     return { queryBuilderData, queryBuilderProps, forcedVisibleSearchInputs, ...api };
 }
 
+// Inertia's reactive page: its url changes after every visit.
+const inertiaPage = reactive({ url: "/" });
+usePage.mockReturnValue(inertiaPage);
+
 function setUrl(search) {
     window.history.replaceState({}, "", "/" + search);
+    inertiaPage.url = "/" + search;
 }
 
 describe("useTableQuery", () => {
@@ -208,7 +216,7 @@ describe("useTableQuery", () => {
         });
     });
 
-    describe("canBeReset (parsing the query string)", () => {
+    describe("canBeReset (reactive Inertia page url)", () => {
         it("is false on a clean URL", () => {
             expect(setup().canBeReset.value).toBe(false);
         });
@@ -243,6 +251,43 @@ describe("useTableQuery", () => {
             expect(setup({ name: "users" }).canBeReset.value).toBe(true);
             setUrl("?usersPage=3");
             expect(setup({ pageName: "usersPage" }).canBeReset.value).toBe(true);
+        });
+
+        it("ignores the hash and works with a full path url", () => {
+            inertiaPage.url = "/products?sort=name#top";
+            expect(setup().canBeReset.value).toBe(true);
+            inertiaPage.url = "/products#top";
+            expect(setup().canBeReset.value).toBe(false);
+        });
+
+        it("is not fooled by server-side default values on a clean URL", () => {
+            const { canBeReset } = setup({
+                props: {
+                    hasEnabledFilters: true,
+                    searchInputs: [{ key: "name", value: "x" }],
+                },
+            });
+            expect(canBeReset.value).toBe(false);
+        });
+
+        it("follows the page url through reset and later navigation", () => {
+            setUrl("?filter[name]=john");
+            const { canBeReset } = setup();
+            expect(canBeReset.value).toBe(true);
+
+            // The reset visit completed: Inertia updates the page url.
+            setUrl("");
+            expect(canBeReset.value).toBe(false);
+
+            // Navigating with new params brings the button back.
+            setUrl("?sort=name");
+            expect(canBeReset.value).toBe(true);
+        });
+
+        it("does not read location.search", () => {
+            window.history.replaceState({}, "", "/?sort=name&page=3");
+            inertiaPage.url = "/";
+            expect(setup().canBeReset.value).toBe(false);
         });
     });
 });
