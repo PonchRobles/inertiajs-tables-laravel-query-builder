@@ -55,6 +55,8 @@ export interface Translations {
     add_search_fields?: string;
     show_hide_columns?: string;
     grouped_reset?: string;
+    number_range_min?: string;
+    number_range_max?: string;
     [key: string]: string | undefined;
 }
 

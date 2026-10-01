@@ -565,6 +565,8 @@ setTranslations({
   grouped_reset: "Reset",
   add_search_fields: "Add search field",
   show_hide_columns: "Show / Hide columns",
+  number_range_min: "Minimum value",
+  number_range_max: "Maximum value",
 });
 ```
 
