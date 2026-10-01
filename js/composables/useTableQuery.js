@@ -1,45 +1,43 @@
-import { computed } from "vue";
+import { computed, unref } from "vue";
+import { usePage } from "@inertiajs/vue3";
 import qs from "qs";
 
 export function useTableQuery(queryBuilderData, queryBuilderProps, tableName, pageName, forcedVisibleSearchInputs) {
 
-    // Derived from the server state (queryBuilderProps, which is reactive and replaced after every
-    // Inertia visit), not from `location.search`, which is not reactive.
+    // Inertia's page url is reactive and is updated after every visit (replace visits included),
+    // unlike `location.search`. It is also available on the server (SSR), where `location` is not.
+    // Inertia v1 exposes `url` as a computed ref, v2/v3 as a plain property of a reactive page: unref handles both.
+    const inertiaPage = usePage();
+    const currentSearch = computed(() => {
+        const url = unref(inertiaPage?.url);
+        if (typeof url !== "string") return "";
+        const queryStart = url.indexOf("?");
+        if (queryStart === -1) return "";
+        return url.slice(queryStart + 1).split("#")[0];
+    });
+
     const canBeReset = computed(() => {
         if (forcedVisibleSearchInputs.value.length > 0) {
             return true;
         }
 
-        const props = queryBuilderProps.value;
+        const queryStringData = qs.parse(currentSearch.value);
+        const page = queryStringData[pageName.value];
 
-        if (props.page > 1) {
+        if (page > 1) {
             return true;
         }
 
-        if (props.cursor) {
-            return true;
-        }
+        const prefix = tableName.value === "default" ? "" : (tableName.value + "_");
 
-        if (props.sort && props.sort !== props.defaultSort) {
-            return true;
-        }
+        for (const key of ["filter", "columns", "cursor", "sort"]) {
+            const value = queryStringData[prefix + key];
 
-        if (props.hasEnabledFilters) {
-            return true;
-        }
+            if (key === "sort" && value === queryBuilderProps.value.defaultSort) {
+                continue;
+            }
 
-        if (Object.values(props.searchInputs ?? {}).some((input) => input.value !== null && input.value !== undefined)) {
-            return true;
-        }
-
-        if (props.columns && props.defaultVisibleToggleableColumns) {
-            const visibleKeys = Object.values(props.columns)
-                .filter((column) => !column.hidden)
-                .map((column) => column.key)
-                .sort();
-            const defaultKeys = [...props.defaultVisibleToggleableColumns].sort();
-
-            if (visibleKeys.length !== defaultKeys.length || visibleKeys.some((key, i) => key !== defaultKeys[i])) {
+            if (value !== undefined) {
                 return true;
             }
         }
