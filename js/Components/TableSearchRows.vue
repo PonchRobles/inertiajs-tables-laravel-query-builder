@@ -43,7 +43,7 @@
           :dusk="`remove-search-row-${searchInput.key}`"
           @click.prevent="onRemove(searchInput.key)"
         >
-          <span class="sr-only">Remove search</span>
+          <span class="sr-only">{{ translations.remove_search }}</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5"
@@ -68,6 +68,9 @@
 import { computed, ref, watch, nextTick, inject } from "vue";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../helpers.js";
+import { getTranslations } from "../translations.js";
+
+const translations = getTranslations();
 
 const skipUnwrap = { el: ref([]) };
 let el = computed(() => skipUnwrap.el.value);

@@ -589,6 +589,7 @@ setTranslations({
   show_hide_columns: "Show / Hide columns",
   number_range_min: "Minimum value",
   number_range_max: "Maximum value",
+  remove_search: "Remove search",
 });
 ```
 

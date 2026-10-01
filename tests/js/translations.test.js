@@ -3,6 +3,8 @@ import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import TableSearchRows from "../../js/Components/TableSearchRows.vue";
+import ToggleFilter from "../../js/Components/TableFilters/ToggleFilter.vue";
 import TableReset from "../../js/Components/TableReset.vue";
 import Pagination from "../../js/Components/Pagination.vue";
 import TableGlobalSearch from "../../js/Components/TableGlobalSearch.vue";
@@ -208,6 +210,38 @@ describe("translations", () => {
             setTranslation("next", "Proxima");
             await nextTick();
             expect(wrapper.text()).toContain("Proxima");
+        });
+
+        const searchRows = () => mount(TableSearchRows, {
+            props: {
+                searchInputs: [{ key: "name", label: "Name", value: "x" }],
+                forcedVisibleSearchInputs: [],
+                onChange: () => {},
+                onRemove: () => {},
+            },
+        });
+        const toggleFilter = () => mount(ToggleFilter, {
+            props: { filter: { key: "active", value: null }, onFilterChange: () => {} },
+        });
+
+        it("the remove search label defaults to English in TableSearchRows and ToggleFilter", () => {
+            expect(searchRows().text()).toContain("Remove search");
+            expect(toggleFilter().text()).toContain("Remove search");
+        });
+
+        it("the remove search label follows setTranslations() and setTranslation() after mount", async () => {
+            const rows = searchRows();
+            const toggle = toggleFilter();
+
+            setTranslations({ remove_search: "Quitar busqueda" });
+            await nextTick();
+            expect(rows.text()).toContain("Quitar busqueda");
+            expect(toggle.text()).toContain("Quitar busqueda");
+
+            setTranslation("remove_search", "Eliminar");
+            await nextTick();
+            expect(rows.text()).toContain("Eliminar");
+            expect(toggle.text()).toContain("Eliminar");
         });
 
         it("TableGlobalSearch placeholder follows the search translation after mount", async () => {

@@ -17,7 +17,7 @@
       :class="getTheme('reset_button')"
       @click.prevent="onFilterChange(filter.key, null)"
     >
-      <span class="sr-only">Remove search</span>
+      <span class="sr-only">{{ translations.remove_search }}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="h-5 w-5"
@@ -40,6 +40,9 @@
 import { inject } from "vue";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../../helpers.js";
+import { getTranslations } from "../../translations.js";
+
+const translations = getTranslations();
 
 const props = defineProps({
     filter: {

@@ -19,6 +19,7 @@ const es = {
     grouped_reset: "Reiniciar",
     number_range_min: "Valor minimo",
     number_range_max: "Valor maximo",
+    remove_search: "Quitar búsqueda",
 };
 
 export const languages = { en: "English", es: "Espanol" };
