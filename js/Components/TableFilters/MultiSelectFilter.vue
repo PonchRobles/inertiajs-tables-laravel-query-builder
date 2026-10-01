@@ -17,24 +17,24 @@
       </button>
     </div>
     <label
-      v-for="(optionLabel, optionKey) in filter.options"
-      :key="optionKey"
+      v-for="option in options"
+      :key="option.value"
       :class="getTheme('option')"
     >
       <input
         type="checkbox"
         :class="getTheme('checkbox')"
-        :value="optionKey"
-        :checked="isSelected(optionKey)"
-        @change="onToggle(optionKey, $event.target.checked)"
+        :value="option.value"
+        :checked="isSelected(option.value)"
+        @change="onToggle(option.value, $event.target.checked)"
       >
-      <span class="ml-2">{{ optionLabel }}</span>
+      <span class="ml-2">{{ option.label }}</span>
     </label>
   </div>
 </template>
 
 <script setup>
-import { inject } from "vue";
+import { computed, inject } from "vue";
 import { getTranslations } from "../../translations.js";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../../helpers.js";
@@ -46,6 +46,15 @@ const props = defineProps({
     onFilterChange: { type: Function, required: true },
     color: { type: String, default: "primary" },
     ui: { type: Object, default: undefined },
+});
+
+// PHP sends `ordered_options` because JS reorders integer-like keys of `options`.
+// Values are kept as strings, matching the keys of `options`.
+const options = computed(() => {
+    if (Array.isArray(props.filter.ordered_options)) {
+        return props.filter.ordered_options.map(({ value, label }) => ({ value: String(value), label }));
+    }
+    return Object.entries(props.filter.options ?? {}).map(([value, label]) => ({ value, label }));
 });
 
 function isSelected(key) {
@@ -64,7 +73,7 @@ function onToggle(key, checked) {
 }
 
 function selectAll() {
-    const allKeys = Object.keys(props.filter.options);
+    const allKeys = options.value.map((option) => option.value);
     props.onFilterChange(props.filter.key, allKeys);
 }
 
