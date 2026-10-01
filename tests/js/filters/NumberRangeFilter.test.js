@@ -18,7 +18,10 @@ describe("NumberRangeFilter", () => {
         ]);
     });
 
-    afterEach(() => vi.restoreAllMocks());
+    afterEach(() => {
+        vi.useRealTimers();
+        vi.restoreAllMocks();
+    });
 
     it("renders the current values and the bounds", () => {
         const text = make().text();
@@ -75,6 +78,8 @@ describe("NumberRangeFilter", () => {
     describe("accessibility and keyboard", () => {
         const handles = (wrapper) => wrapper.findAll("[role='slider']");
 
+        beforeEach(() => vi.useFakeTimers());
+
         it("exposes two focusable sliders with ARIA values and labels", () => {
             const [minHandle, maxHandle] = handles(make());
             expect(minHandle.attributes("tabindex")).toBe("0");
@@ -101,7 +106,10 @@ describe("NumberRangeFilter", () => {
             const wrapper = make({ step: 5 });
             const [minHandle, maxHandle] = handles(wrapper);
             await minHandle.trigger("keydown", { key: "ArrowRight" });
+            expect(minHandle.attributes("aria-valuenow")).toBe("25");
+            vi.advanceTimersByTime(350);
             await maxHandle.trigger("keydown", { key: "ArrowLeft" });
+            vi.advanceTimersByTime(350);
             expect(wrapper.emitted("update:modelValue")).toEqual([[[25, 80]], [[25, 75]]]);
         });
 
@@ -109,7 +117,9 @@ describe("NumberRangeFilter", () => {
             const wrapper = make();
             const [minHandle, maxHandle] = handles(wrapper);
             await minHandle.trigger("keydown", { key: "PageUp" });
+            vi.advanceTimersByTime(350);
             await maxHandle.trigger("keydown", { key: "PageDown" });
+            vi.advanceTimersByTime(350);
             expect(wrapper.emitted("update:modelValue")).toEqual([[[30, 80]], [[30, 70]]]);
         });
 
@@ -117,7 +127,9 @@ describe("NumberRangeFilter", () => {
             const wrapper = make();
             const [minHandle, maxHandle] = handles(wrapper);
             await minHandle.trigger("keydown", { key: "Home" });
+            vi.advanceTimersByTime(350);
             await maxHandle.trigger("keydown", { key: "End" });
+            vi.advanceTimersByTime(350);
             expect(wrapper.emitted("update:modelValue")).toEqual([[[0, 80]], [[0, 100]]]);
         });
 
@@ -125,9 +137,41 @@ describe("NumberRangeFilter", () => {
             const wrapper = make({ modelValue: [40, 60] });
             const [minHandle, maxHandle] = handles(wrapper);
             await minHandle.trigger("keydown", { key: "End" });
+            vi.advanceTimersByTime(350);
             expect(wrapper.emitted("update:modelValue")[0]).toEqual([[60, 60]]);
             await maxHandle.trigger("keydown", { key: "Home" });
+            vi.advanceTimersByTime(350);
             expect(wrapper.emitted("update:modelValue")[1]).toEqual([[60, 60]]);
+        });
+
+        it("emits once, after the delay, when keys are repeated", async () => {
+            const wrapper = make();
+            const [minHandle] = handles(wrapper);
+            for (let i = 0; i < 5; i++) {
+                await minHandle.trigger("keydown", { key: "ArrowRight" });
+            }
+            expect(minHandle.attributes("aria-valuenow")).toBe("25");
+            expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+            vi.advanceTimersByTime(349);
+            expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+            vi.advanceTimersByTime(1);
+            expect(wrapper.emitted("update:modelValue")).toEqual([[[25, 80]]]);
+        });
+
+        it("does not emit after unmount", async () => {
+            const wrapper = make();
+            await handles(wrapper)[0].trigger("keydown", { key: "ArrowRight" });
+            wrapper.unmount();
+            vi.advanceTimersByTime(1000);
+            expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+        });
+
+        it("reset cancels a pending keyboard emit", async () => {
+            const wrapper = make();
+            await handles(wrapper)[0].trigger("keydown", { key: "ArrowRight" });
+            await wrapper.find("button").trigger("click");
+            vi.advanceTimersByTime(1000);
+            expect(wrapper.emitted("update:modelValue")).toEqual([[[0, 100]]]);
         });
 
         it("ignores other keys", async () => {
@@ -160,6 +204,30 @@ describe("NumberRangeFilter", () => {
             const wrapper = make();
             await wrapper.setProps({ modelValue: null });
             expect(wrapper.find("[style*='width']").attributes("style")).toContain("width: 100%");
+        });
+    });
+
+    describe("pointer lifecycle", () => {
+        it("removes the window listeners when unmounted mid-drag", async () => {
+            const removeSpy = vi.spyOn(window, "removeEventListener");
+            const wrapper = make();
+            await wrapper.findAll(".cursor-pointer")[0].trigger("pointerdown");
+            wrapper.unmount();
+            const removed = removeSpy.mock.calls.map(([type]) => type);
+            expect(removed).toEqual(expect.arrayContaining(["pointermove", "pointerup", "pointercancel"]));
+
+            window.dispatchEvent(new MouseEvent("pointermove", { clientX: 40 }));
+            window.dispatchEvent(new MouseEvent("pointerup"));
+            expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+        });
+
+        it("ignores modelValue changes while dragging", async () => {
+            const wrapper = make();
+            await wrapper.findAll(".cursor-pointer")[0].trigger("pointerdown");
+            window.dispatchEvent(new MouseEvent("pointermove", { clientX: 30 }));
+            await wrapper.setProps({ modelValue: [10, 50] });
+            window.dispatchEvent(new MouseEvent("pointerup"));
+            expect(wrapper.emitted("update:modelValue")).toEqual([[[30, 80]]]);
         });
     });
 });

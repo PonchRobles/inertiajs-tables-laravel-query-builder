@@ -131,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, inject } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted, inject } from "vue";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../../helpers.js";
 import { getTranslations } from "../../translations.js";
@@ -147,6 +147,7 @@ const props = defineProps({
     prefix: { type: String, default: "" },
     suffix: { type: String, default: "" },
     step: { type: Number, default: 1 },
+    debounceMs: { type: Number, default: 350 },
     color: { type: String, default: "primary" },
     ui: { type: Object, default: undefined },
 });
@@ -263,6 +264,13 @@ const pageStep = computed(() => {
     return Math.max(step, roundToStep(tenPercent));
 });
 
+let keyboardEmitTimeout = null;
+
+function clearKeyboardEmit() {
+    clearTimeout(keyboardEmitTimeout);
+    keyboardEmitTimeout = null;
+}
+
 function setHandleValue(isMin, value) {
     const next = Math.min(Math.max(roundToStep(value), Number(props.min)), Number(props.max));
 
@@ -272,7 +280,11 @@ function setHandleValue(isMin, value) {
         internalValue.value = [currentMinValue.value, Math.max(next, currentMinValue.value)];
     }
 
-    emit("update:modelValue", [currentMinValue.value, currentMaxValue.value]);
+    clearKeyboardEmit();
+    keyboardEmitTimeout = setTimeout(() => {
+        keyboardEmitTimeout = null;
+        emit("update:modelValue", [currentMinValue.value, currentMaxValue.value]);
+    }, props.debounceMs);
 }
 
 function handleKeyDown(event, isMin) {
@@ -310,6 +322,7 @@ function handleKeyDown(event, isMin) {
 }
 
 function reset() {
+    clearKeyboardEmit();
     internalValue.value = null;
     emit("update:modelValue", [Number(props.min), Number(props.max)]);
 }
@@ -319,11 +332,19 @@ watch(internalValue, () => {
 });
 
 watch(() => props.modelValue, (value) => {
+    if (moveMin.value || moveMax.value) return;
     internalValue.value = Array.isArray(value) ? [...value] : null;
 }, { deep: true });
 
 onMounted(() => {
     detectIfOverlap();
+});
+
+onUnmounted(() => {
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", handlePointerUp);
+    window.removeEventListener("pointercancel", handlePointerUp);
+    clearKeyboardEmit();
 });
 
 // Theme
