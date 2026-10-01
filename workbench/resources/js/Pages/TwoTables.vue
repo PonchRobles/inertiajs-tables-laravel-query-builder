@@ -1,13 +1,13 @@
 <template>
   <Demo>
     <h1 class="text-xl font-semibold mb-4">
-      Two named tables
+      {{ $page.props.demo.two_tables }}
     </h1>
     <p class="text-sm text-gray-600 mb-6">
-      Each table has prefixed query keys (<code>gadgets_*</code>, <code>household_*</code>) and its own per page value.
+      {{ $page.props.demo.two_tables_description }}
     </p>
     <h2 class="font-medium mb-2">
-      Gadgets
+      {{ $page.props.demo.gadgets }}
     </h2>
     <Table
       :resource="gadgets"
@@ -15,7 +15,7 @@
       preserve-scroll="table-top"
     />
     <h2 class="font-medium mt-10 mb-2">
-      Household
+      {{ $page.props.demo.household }}
     </h2>
     <Table
       :resource="household"

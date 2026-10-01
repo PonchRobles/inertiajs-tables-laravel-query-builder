@@ -107,7 +107,9 @@ composer demo:setup     # creates and seeds workbench/database/database.sqlite (
 composer serve          # serves the demo, usually on http://127.0.0.1:8000
 ```
 
-Open `/products` (full table) or `/two-tables`. For hot reload, run `npm run demo:dev` in a second terminal instead of `demo:build`. Run `composer demo:setup` again to reset the data. The demo uses Tailwind CSS v3. The `workbench/` folder, `testbench.yaml` and the `*.workbench.config.js` files are not part of the npm or Composer packages.
+Open `/products` (full table) or `/two-tables`. For hot reload, run `npm run demo:dev` in a second terminal instead of `demo:build`. Run `composer demo:setup` again to reset the data. The language switcher stores the locale in a `demo_locale` cookie that a workbench middleware applies on the server: column, filter and option labels and the page texts are translated server-side (`workbench/lang/en` and `es`), while `setTranslations()` covers the package's own strings, driven by the same locale.
+
+The demo uses Tailwind CSS v3. The `workbench/` folder, `testbench.yaml` and the `*.workbench.config.js` files are not part of the npm or Composer packages.
 
 ## Releasing
 

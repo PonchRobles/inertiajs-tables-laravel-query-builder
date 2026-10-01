@@ -1,7 +1,7 @@
 <template>
   <Demo>
     <h1 class="text-xl font-semibold mb-4">
-      Products
+      {{ $page.props.demo.products }}
     </h1>
     <Table
       :resource="products"
@@ -10,11 +10,14 @@
       <template #cell(price)="{ item }">
         ${{ Number(item.price).toFixed(2) }}
       </template>
+      <template #cell(category)="{ item }">
+        {{ $page.props.categories[item.category] ?? item.category }}
+      </template>
       <template #cell(stock)="{ item }">
         {{ item.stock ?? "-" }}
       </template>
       <template #cell(is_active)="{ item }">
-        {{ item.is_active ? "Yes" : "No" }}
+        {{ item.is_active ? $page.props.demo.yes : $page.props.demo.no }}
       </template>
       <template #cell(released_at)="{ item }">
         {{ item.released_at ?? "-" }}
