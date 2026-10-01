@@ -116,7 +116,7 @@ describe("useTableQuery", () => {
             expect(decodeURIComponent(different.generateNewQueryString())).toBe("columns[0]=a");
         });
 
-        it("prefixes filter, sort, columns and cursor for named tables but not perPage", () => {
+        it("prefixes filter, sort, columns and cursor and perPage for named tables", () => {
             const { generateNewQueryString } = setup({
                 name: "users",
                 data: { sort: "name", cursor: "c1", perPage: 50, page: 2 },
@@ -124,8 +124,28 @@ describe("useTableQuery", () => {
             const query = decodeURIComponent(generateNewQueryString());
             expect(query).toContain("users_sort=name");
             expect(query).toContain("users_cursor=c1");
-            expect(query).toContain("perPage=50");
+            expect(query).toContain("users_perPage=50");
+            expect(query).not.toMatch(/(^|&)perPage=/);
             expect(query).toContain("page=2");
+        });
+
+        it("keeps the plain perPage for the default table", () => {
+            const query = setup({ data: { perPage: 50 } }).generateNewQueryString();
+            expect(query).toBe("perPage=50");
+        });
+
+        it("keeps independent perPage values for two named tables", () => {
+            setUrl("?posts_perPage=30");
+            const users = setup({ name: "users", data: { perPage: 50 } });
+            const query = decodeURIComponent(users.generateNewQueryString());
+            expect(query).toContain("users_perPage=50");
+            expect(query).toContain("posts_perPage=30");
+
+            setUrl("?users_perPage=50&posts_perPage=30");
+            const posts = setup({ name: "posts", data: { perPage: 100 } });
+            const query2 = decodeURIComponent(posts.generateNewQueryString());
+            expect(query2).toContain("users_perPage=50");
+            expect(query2).toContain("posts_perPage=100");
         });
 
         it("preserves unrelated query params and drops stale table params", () => {

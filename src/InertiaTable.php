@@ -76,6 +76,12 @@ class InertiaTable
      * value only if it is an integer present in $options, otherwise $default
      * (or the first option when no default is given).
      *
+     * When $name is given, `{name}_perPage` is read. If that parameter is absent,
+     * the plain `perPage` parameter is used as a fallback.
+     *
+     * @deprecated The fallback to the unprefixed `perPage` for named tables is
+     *             deprecated and will be removed in the next release.
+     *
      * @param int[] $options
      *
      * @throws \InvalidArgumentException when $options is empty
@@ -84,6 +90,7 @@ class InertiaTable
         ?Request $request = null,
         array $options = self::DEFAULT_PER_PAGE_OPTIONS,
         ?int $default = null,
+        ?string $name = null,
     ): int {
         if ($options === []) {
             throw new \InvalidArgumentException('The per page options must not be empty.');
@@ -91,7 +98,14 @@ class InertiaTable
 
         $options = array_values($options);
         $request ??= request();
+
         $value = $request->query('perPage');
+
+        if ($name !== null && $name !== '' && $name !== 'default') {
+            // DEPRECATED: falling back to the unprefixed `perPage` for named tables
+            // is kept for one release only, to ease migration of existing URLs.
+            $value = $request->query("{$name}_perPage", $value);
+        }
 
         if (is_string($value) && preg_match('/^[1-9][0-9]*$/', $value) === 1) {
             $value = (int) $value;

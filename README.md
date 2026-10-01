@@ -335,11 +335,13 @@ InertiaTable::perPage(
 	?Request $request = null,          // defaults to the current request
 	array $options = [15, 30, 50, 100], // allowed values
 	?int $default = null,              // fallback, defaults to the first option
+	?string $name = null,              // name of the table, see below
 ): int
 ```
 
 - Only whole positive numbers in `$options` are accepted; `-1`, `0`, `abc`, `15.5` and values not in the options all fall back to `$default ?? $options[0]`.
-- The helper always reads the plain `perPage` parameter, because that is what the frontend sends. Note that `perPage` is currently shared by all tables on a page: there is no per-table prefix (`{name}_perPage` is ignored).
+- The default (unnamed) table uses the plain `perPage` parameter. A named table (`InertiaTable::updateQueryBuilderParameters('users')`) uses `{name}_perPage`, so several tables on one page keep independent values. Pass the table name: `InertiaTable::perPage(name: 'users')`.
+- **Deprecated:** if `{name}_perPage` is absent, the helper falls back to the unprefixed `perPage` so that existing bookmarked URLs keep working. This fallback exists for one release only and will be removed; the frontend now only sends `{name}_perPage` for named tables.
 - Passing an empty `$options` array throws an `InvalidArgumentException`.
 - Keep the options in sync with the ones sent to the frontend, e.g. `perPageOptions([10, 25, 50])` together with `InertiaTable::perPage(options: [10, 25, 50])`.
 
