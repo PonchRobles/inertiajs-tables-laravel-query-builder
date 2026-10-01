@@ -205,4 +205,21 @@ class FilterTest extends TestCase
         $filter->setValue('a');
         $this->assertEquals(['a'], $filter->getValue());
     }
+
+    public function test_multi_select_filter_to_array_keeps_php_order_in_ordered_options(): void
+    {
+        $filter = new MultiSelectFilter(
+            key: 'tags',
+            label: 'Tags',
+            options: [3 => 'c', 1 => 'a'],
+        );
+
+        $array = $filter->toArray();
+
+        $this->assertSame([3 => 'c', 1 => 'a'], $array['options']);
+        $this->assertSame([
+            ['value' => 3, 'label' => 'c'],
+            ['value' => 1, 'label' => 'a'],
+        ], $array['ordered_options']);
+    }
 }
