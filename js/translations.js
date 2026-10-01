@@ -1,3 +1,5 @@
+import { reactive } from "vue";
+
 const defaultTranslations = Object.freeze({
     next: "Next",
     no_results_found: "No results found",
@@ -19,20 +21,27 @@ const defaultTranslations = Object.freeze({
     number_range_max: "Maximum value",
 });
 
-const translationsObject = {
-    translations: { ...defaultTranslations },
-};
+// One stable reactive object: components read it at setup (`getTranslations()`) and, being reactive,
+// their templates update whenever `setTranslation(s)` is called, even after they are mounted.
+const translations = reactive({ ...defaultTranslations });
 
-export default translationsObject.translations;
+export default translations;
 
 export function getTranslations() {
-    return translationsObject.translations;
+    return translations;
 }
 
 export function setTranslation(key, value) {
-    translationsObject.translations[key] = value;
+    translations[key] = value;
 }
 
-export function setTranslations(translations) {
-    translationsObject.translations = { ...defaultTranslations, ...translations };
+export function setTranslations(newTranslations) {
+    // Merge with the defaults and drop keys set by an earlier call, mutating in place.
+    for (const key of Object.keys(translations)) {
+        if (!(key in defaultTranslations)) {
+            delete translations[key];
+        }
+    }
+
+    Object.assign(translations, defaultTranslations, newTranslations);
 }
