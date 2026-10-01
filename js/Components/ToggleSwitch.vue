@@ -11,7 +11,7 @@
     :dusk="dusk"
     @click.prevent="$emit('update:modelValue', !modelValue)"
   >
-    <span class="sr-only">Toggle</span>
+    <span class="sr-only">{{ translations.toggle }}</span>
     <span
       aria-hidden="true"
       :class="[
@@ -26,6 +26,9 @@
 import { inject } from "vue";
 import { twMerge } from "tailwind-merge";
 import { get_theme_part } from "../helpers.js";
+import { getTranslations } from "../translations.js";
+
+const translations = getTranslations();
 
 defineEmits(["update:modelValue"]);
 

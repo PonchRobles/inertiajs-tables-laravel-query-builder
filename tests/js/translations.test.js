@@ -5,6 +5,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import TableSearchRows from "../../js/Components/TableSearchRows.vue";
 import ToggleFilter from "../../js/Components/TableFilters/ToggleFilter.vue";
+import ToggleSwitch from "../../js/Components/ToggleSwitch.vue";
 import TableReset from "../../js/Components/TableReset.vue";
 import Pagination from "../../js/Components/Pagination.vue";
 import TableGlobalSearch from "../../js/Components/TableGlobalSearch.vue";
@@ -242,6 +243,19 @@ describe("translations", () => {
             await nextTick();
             expect(rows.text()).toContain("Eliminar");
             expect(toggle.text()).toContain("Eliminar");
+        });
+
+        it("the ToggleSwitch label defaults to English and follows setTranslations() after mount", async () => {
+            const wrapper = mount(ToggleSwitch, { props: { modelValue: false } });
+            expect(wrapper.find(".sr-only").text()).toBe("Toggle");
+
+            setTranslations({ toggle: "Alternar" });
+            await nextTick();
+            expect(wrapper.find(".sr-only").text()).toBe("Alternar");
+
+            setTranslation("toggle", "Cambiar");
+            await nextTick();
+            expect(wrapper.find(".sr-only").text()).toBe("Cambiar");
         });
 
         it("TableGlobalSearch placeholder follows the search translation after mount", async () => {
