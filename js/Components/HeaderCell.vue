@@ -7,6 +7,7 @@
       :is="cell.sortable ? 'button' : 'div'"
       :type="cell.sortable ? 'button' : undefined"
       class="w-full"
+      :class="{ 'cursor-pointer': cell.sortable }"
       :dusk="cell.sortable ? `sort-${cell.key}` : null"
       @click.prevent="onClick"
     >

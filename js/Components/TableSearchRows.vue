@@ -5,7 +5,7 @@
     :key="key"
     class="px-4 sm:px-0"
   >
-    <div class="flex rounded-md shadow-sm relative mt-3">
+    <div class="flex rounded-md shadow-[0_1px_2px_0_rgb(0_0_0/0.05)] relative mt-3">
       <label
         :for="searchInput.key"
         class="inline-flex items-center px-4 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm"
@@ -128,14 +128,14 @@ watch(props.forcedVisibleSearchInputs, (inputs) => {
 // Theme
 const fallbackTheme = {
     input: {
-        base: "flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md text-sm",
+        base: "flex-1 min-w-0 block w-full px-3 py-2 placeholder:text-gray-400 rounded-none rounded-r-md text-sm",
         color: {
             primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
             dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
         },
     },
     remove_button: {
-        base: "rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
+        base: "cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
         color: {
             primary: "text-gray-400 hover:text-gray-500 focus:ring-indigo-500",
             dootix: "text-gray-400 hover:text-gray-500 focus:ring-cyan-500",

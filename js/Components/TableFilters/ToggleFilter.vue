@@ -75,7 +75,7 @@ const fallbackTheme = {
         },
     },
     reset_button: {
-        base: "rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
+        base: "cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
         color: {
             primary: "text-gray-400 hover:text-gray-500 focus:ring-indigo-500",
             dootix: "text-gray-400 hover:text-gray-500 focus:ring-cyan-500",

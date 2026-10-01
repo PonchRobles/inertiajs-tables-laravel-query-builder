@@ -204,13 +204,13 @@ function menuClosed() {
 // Theme
 const fallbackTheme = {
     menu_item: {
-        base: "text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex gap-2 items-center",
+        base: "cursor-pointer text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex gap-2 items-center",
     },
     search_item: {
-        base: "text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+        base: "cursor-pointer text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900",
     },
     reset_button: {
-        base: "text-left w-full px-4 py-2 text-sm text-red-500 hover:bg-gray-100 hover:text-red-700 flex gap-2 items-center",
+        base: "cursor-pointer text-left w-full px-4 py-2 text-sm text-red-500 hover:bg-gray-100 hover:text-red-700 flex gap-2 items-center",
     },
 };
 const themeVariables = inject("themeVariables");

@@ -100,7 +100,7 @@
       </div>
       <div>
         <nav
-          class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+          class="relative z-0 inline-flex rounded-md shadow-[0_1px_2px_0_rgb(0_0_0/0.05)] -space-x-px"
           aria-label="Pagination"
         >
           <component

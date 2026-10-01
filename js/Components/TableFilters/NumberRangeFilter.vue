@@ -46,7 +46,7 @@
                   y="0px"
                   viewBox="0 0 255 255"
                   xml:space="preserve"
-                  :class="[hasOverlap && displayFirstDown ? 'bottom-6 rotate-180' : 'top-100', getTheme('popover_arrow')]"
+                  :class="[hasOverlap && displayFirstDown ? 'bottom-6 rotate-180' : '', getTheme('popover_arrow')]"
                 >
                   <polygon
                     class="fill-current"
@@ -85,12 +85,12 @@
                 </div>
                 <div draggable="true">
                   <svg
-                    class="absolute w-full h-2 left-0 top-100"
+                    class="absolute w-full h-2 left-0"
                     x="0px"
                     y="0px"
                     viewBox="0 0 255 255"
                     xml:space="preserve"
-                    :class="[hasOverlap && !displayFirstDown ? 'bottom-6 rotate-180' : 'top-100', getTheme('popover_arrow')]"
+                    :class="[hasOverlap && !displayFirstDown ? 'bottom-6 rotate-180' : '', getTheme('popover_arrow')]"
                   >
                     <polygon
                       class="fill-current"
@@ -122,7 +122,7 @@
     </div>
     <button
       type="button"
-      class="text-xs text-gray-500 hover:text-gray-700"
+      class="cursor-pointer text-xs text-gray-500 hover:text-gray-700"
       @click.prevent="reset"
     >
       {{ translations.reset }}
@@ -360,7 +360,7 @@ const fallbackTheme = {
         color: { primary: "bg-indigo-600", dootix: "bg-gradient-to-r from-cyan-500 to-blue-600" },
     },
     button: {
-        base: "h-4 w-4 rounded-full shadow border",
+        base: "h-4 w-4 rounded-full shadow-[0_1px_3px_0_rgb(0_0_0/0.1),0_1px_2px_-1px_rgb(0_0_0/0.1)] border",
         color: { primary: "bg-white border-gray-300", dootix: "bg-white border-gray-300" },
     },
     popover: {

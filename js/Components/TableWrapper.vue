@@ -24,7 +24,7 @@ const fallbackTheme = {
     wrapper: { base: "flow-root" },
     scroll: { base: "-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8" },
     align: { base: "inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8" },
-    inner: { base: "overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg" },
+    inner: { base: "overflow-hidden shadow-[0_1px_3px_0_rgb(0_0_0/0.1),0_1px_2px_-1px_rgb(0_0_0/0.1)] ring-1 ring-black/5 sm:rounded-lg" },
 };
 const themeVariables = inject("themeVariables");
 const getTheme = (item) => {

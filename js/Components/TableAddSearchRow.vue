@@ -67,7 +67,7 @@ function enableSearch(key) {
 // Theme
 const fallbackTheme = {
     menu_item: {
-        base: "text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+        base: "cursor-pointer text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900",
     },
 };
 const themeVariables = inject("themeVariables");
