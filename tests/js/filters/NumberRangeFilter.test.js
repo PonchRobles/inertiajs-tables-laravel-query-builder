@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mount } from "@vue/test-utils";
+import { setTranslations } from "../../../js/translations.js";
 import NumberRangeFilter from "../../../js/Components/TableFilters/NumberRangeFilter.vue";
 
 function make(props = {}) {
@@ -48,26 +49,117 @@ describe("NumberRangeFilter", () => {
     it("emits update:modelValue on mouse up after dragging the min handle", async () => {
         const wrapper = make();
         const handles = wrapper.findAll(".cursor-pointer");
-        await handles[0].trigger("mousedown");
-        window.dispatchEvent(new MouseEvent("mousemove", { clientX: 40 }));
-        window.dispatchEvent(new MouseEvent("mouseup"));
+        await handles[0].trigger("pointerdown");
+        window.dispatchEvent(new MouseEvent("pointermove", { clientX: 40 }));
+        window.dispatchEvent(new MouseEvent("pointerup"));
         expect(wrapper.emitted("update:modelValue")).toEqual([[[40, 80]]]);
     });
 
     it("emits the new max after dragging the max handle", async () => {
         const wrapper = make();
         const handles = wrapper.findAll(".cursor-pointer");
-        await handles[1].trigger("mousedown");
-        window.dispatchEvent(new MouseEvent("mousemove", { clientX: 90 }));
-        window.dispatchEvent(new MouseEvent("mouseup"));
+        await handles[1].trigger("pointerdown");
+        window.dispatchEvent(new MouseEvent("pointermove", { clientX: 90 }));
+        window.dispatchEvent(new MouseEvent("pointerup"));
         expect(wrapper.emitted("update:modelValue")).toEqual([[[20, 90]]]);
     });
 
     it("does not let the min handle pass the max value", async () => {
         const wrapper = make();
-        await wrapper.findAll(".cursor-pointer")[0].trigger("mousedown");
-        window.dispatchEvent(new MouseEvent("mousemove", { clientX: 95 }));
-        window.dispatchEvent(new MouseEvent("mouseup"));
+        await wrapper.findAll(".cursor-pointer")[0].trigger("pointerdown");
+        window.dispatchEvent(new MouseEvent("pointermove", { clientX: 95 }));
+        window.dispatchEvent(new MouseEvent("pointerup"));
         expect(wrapper.emitted("update:modelValue")).toEqual([[[20, 80]]]);
+    });
+
+    describe("accessibility and keyboard", () => {
+        const handles = (wrapper) => wrapper.findAll("[role='slider']");
+
+        it("exposes two focusable sliders with ARIA values and labels", () => {
+            const [minHandle, maxHandle] = handles(make());
+            expect(minHandle.attributes("tabindex")).toBe("0");
+            expect(minHandle.attributes("aria-valuemin")).toBe("0");
+            expect(minHandle.attributes("aria-valuemax")).toBe("80");
+            expect(minHandle.attributes("aria-valuenow")).toBe("20");
+            expect(minHandle.attributes("aria-label")).toBe("Minimum value");
+            expect(maxHandle.attributes("tabindex")).toBe("0");
+            expect(maxHandle.attributes("aria-valuemin")).toBe("20");
+            expect(maxHandle.attributes("aria-valuemax")).toBe("100");
+            expect(maxHandle.attributes("aria-valuenow")).toBe("80");
+            expect(maxHandle.attributes("aria-label")).toBe("Maximum value");
+        });
+
+        it("uses overridden translations for the aria labels", () => {
+            setTranslations({ number_range_min: "Minimo", number_range_max: "Maximo" });
+            const [minHandle, maxHandle] = handles(make());
+            expect(minHandle.attributes("aria-label")).toBe("Minimo");
+            expect(maxHandle.attributes("aria-label")).toBe("Maximo");
+            setTranslations({});
+        });
+
+        it("moves one step with the arrow keys", async () => {
+            const wrapper = make({ step: 5 });
+            const [minHandle, maxHandle] = handles(wrapper);
+            await minHandle.trigger("keydown", { key: "ArrowRight" });
+            await maxHandle.trigger("keydown", { key: "ArrowLeft" });
+            expect(wrapper.emitted("update:modelValue")).toEqual([[[25, 80]], [[25, 75]]]);
+        });
+
+        it("moves 10% of the range with PageUp and PageDown", async () => {
+            const wrapper = make();
+            const [minHandle, maxHandle] = handles(wrapper);
+            await minHandle.trigger("keydown", { key: "PageUp" });
+            await maxHandle.trigger("keydown", { key: "PageDown" });
+            expect(wrapper.emitted("update:modelValue")).toEqual([[[30, 80]], [[30, 70]]]);
+        });
+
+        it("jumps to the bounds with Home and End", async () => {
+            const wrapper = make();
+            const [minHandle, maxHandle] = handles(wrapper);
+            await minHandle.trigger("keydown", { key: "Home" });
+            await maxHandle.trigger("keydown", { key: "End" });
+            expect(wrapper.emitted("update:modelValue")).toEqual([[[0, 80]], [[0, 100]]]);
+        });
+
+        it("does not let the handles cross with the keyboard", async () => {
+            const wrapper = make({ modelValue: [40, 60] });
+            const [minHandle, maxHandle] = handles(wrapper);
+            await minHandle.trigger("keydown", { key: "End" });
+            expect(wrapper.emitted("update:modelValue")[0]).toEqual([[60, 60]]);
+            await maxHandle.trigger("keydown", { key: "Home" });
+            expect(wrapper.emitted("update:modelValue")[1]).toEqual([[60, 60]]);
+        });
+
+        it("ignores other keys", async () => {
+            const wrapper = make();
+            await handles(wrapper)[0].trigger("keydown", { key: "a" });
+            expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+        });
+    });
+
+    describe("reset and modelValue sync", () => {
+        it("resets to the full range", async () => {
+            const wrapper = make();
+            await wrapper.find("button").trigger("click");
+            expect(wrapper.emitted("update:modelValue")).toEqual([[[0, 100]]]);
+            const bar = wrapper.find("[style*='width']");
+            expect(bar.attributes("style")).toContain("width: 100%");
+            expect(bar.attributes("style")).toContain("left: 0%");
+        });
+
+        it("updates the slider when modelValue changes after mount", async () => {
+            const wrapper = make();
+            await wrapper.setProps({ modelValue: [10, 50] });
+            const bar = wrapper.find("[style*='width']");
+            expect(bar.attributes("style")).toContain("width: 40%");
+            expect(bar.attributes("style")).toContain("left: 10%");
+            expect(wrapper.findAll("[role='slider']")[0].attributes("aria-valuenow")).toBe("10");
+        });
+
+        it("goes back to the full range when modelValue becomes null", async () => {
+            const wrapper = make();
+            await wrapper.setProps({ modelValue: null });
+            expect(wrapper.find("[style*='width']").attributes("style")).toContain("width: 100%");
+        });
     });
 });
