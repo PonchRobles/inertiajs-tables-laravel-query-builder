@@ -37,21 +37,13 @@
           {{ filter.label }}
         </h3>
         <div class="p-2">
-          <select
+          <SelectFilter
             v-if="filter.type === 'select'"
-            :name="filter.key"
-            :value="filter.value"
-            :class="getTheme('select', color)"
-            @change="onFilterChange(filter.key, $event.target.value)"
-          >
-            <option
-              v-for="(option, optionKey) in filter.options"
-              :key="optionKey"
-              :value="optionKey"
-            >
-              {{ option }}
-            </option>
-          </select>
+            :filter="filter"
+            :on-filter-change="onFilterChange"
+            :color="color"
+            :ui="ui"
+          />
           <ToggleFilter
             v-if="filter.type === 'toggle'"
             :filter="filter"
@@ -94,13 +86,12 @@
 
 <script setup>
 import ButtonWithDropdown from "./ButtonWithDropdown.vue";
-import { computed, inject, ref } from "vue";
+import { computed, ref } from "vue";
+import SelectFilter from "./TableFilters/SelectFilter.vue";
 import ToggleFilter from "./TableFilters/ToggleFilter.vue";
 import NumberRangeFilter from "./TableFilters/NumberRangeFilter.vue";
 import DateRangeFilter from "./TableFilters/DateRangeFilter.vue";
 import MultiSelectFilter from "./TableFilters/MultiSelectFilter.vue";
-import { twMerge } from "tailwind-merge";
-import { get_theme_part } from "../helpers.js";
 
 const props = defineProps({
     hasEnabledFilters: {
@@ -165,22 +156,4 @@ function updateNumberRangeFilter(filter) {
     }
     props.onFilterChange(filter.key, value);
 }
-
-// Theme
-const fallbackTheme = {
-    select: {
-        base: "block w-full shadow-sm text-sm rounded-md",
-        color: {
-            primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
-            dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",
-        },
-    },
-};
-const themeVariables = inject("themeVariables");
-const getTheme = (item) => {
-    return twMerge(
-        get_theme_part([item, "base"], fallbackTheme, themeVariables?.inertia_table?.table_filter?.select_filter, props.ui),
-        get_theme_part([item, "color", props.color], fallbackTheme, themeVariables?.inertia_table?.table_filter?.select_filter, props.ui),
-    );
-};
 </script>
