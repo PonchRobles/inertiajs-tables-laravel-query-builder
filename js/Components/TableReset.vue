@@ -19,7 +19,7 @@
         clip-rule="evenodd"
       />
     </svg>
-    <span>{{ translations.reset ?? 'Reset' }}</span>
+    <span>{{ translations.reset }}</span>
   </button>
 </template>
 

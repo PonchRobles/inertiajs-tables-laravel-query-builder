@@ -2,7 +2,7 @@
   <div class="relative">
     <input
       :class="getTheme('input')"
-      :placeholder="label"
+      :placeholder="label ?? translations.search"
       :value="value"
       type="text"
       name="global"
@@ -37,7 +37,7 @@ const translations = getTranslations();
 const props = defineProps({
     label: {
         type: String,
-        default: "Search...",
+        default: undefined,
         required: false,
     },
 

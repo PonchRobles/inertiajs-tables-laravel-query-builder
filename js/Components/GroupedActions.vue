@@ -44,7 +44,7 @@
               clip-rule="evenodd"
             />
           </svg>
-          <span>{{ translations.add_search_fields ?? 'Add search field' }}</span>
+          <span>{{ translations.add_search_fields }}</span>
         </button>
         <button
           v-if="'toggleColumns' in actions && actions.toggleColumns.show"
@@ -67,7 +67,7 @@
               clip-rule="evenodd"
             />
           </svg>
-          <span>{{ translations.show_hide_columns ?? 'Show / Hide columns' }}</span>
+          <span>{{ translations.show_hide_columns }}</span>
         </button>
         <hr>
         <button
@@ -90,7 +90,7 @@
               clip-rule="evenodd"
             />
           </svg>
-          <span>{{ translations.grouped_reset ?? 'Reset' }}</span>
+          <span>{{ translations.grouped_reset }}</span>
         </button>
       </div>
 
@@ -114,7 +114,7 @@
               stroke-linejoin="round"
             />
           </svg>
-          <span>{{ translations.add_search_fields ?? 'Add search field' }}</span>
+          <span>{{ translations.add_search_fields }}</span>
         </button>
         <button
           v-for="(searchInput, key) in actions.searchFields.searchInputs"
@@ -149,7 +149,7 @@
               stroke-linejoin="round"
             />
           </svg>
-          <span>{{ translations.show_hide_columns ?? 'Show / Hide columns' }}</span>
+          <span>{{ translations.show_hide_columns }}</span>
         </button>
         <div class="px-2">
           <ul class="divide-y divide-gray-200">
