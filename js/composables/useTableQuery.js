@@ -3,28 +3,43 @@ import qs from "qs";
 
 export function useTableQuery(queryBuilderData, queryBuilderProps, tableName, pageName, forcedVisibleSearchInputs) {
 
+    // Derived from the server state (queryBuilderProps, which is reactive and replaced after every
+    // Inertia visit), not from `location.search`, which is not reactive.
     const canBeReset = computed(() => {
         if (forcedVisibleSearchInputs.value.length > 0) {
             return true;
         }
 
-        const queryStringData = qs.parse(location.search.substring(1));
-        const page = queryStringData[pageName.value];
+        const props = queryBuilderProps.value;
 
-        if (page > 1) {
+        if (props.page > 1) {
             return true;
         }
 
-        const prefix = tableName.value === "default" ? "" : (tableName.value + "_");
+        if (props.cursor) {
+            return true;
+        }
 
-        for (const key of ["filter", "columns", "cursor", "sort"]) {
-            const value = queryStringData[prefix + key];
+        if (props.sort && props.sort !== props.defaultSort) {
+            return true;
+        }
 
-            if (key === "sort" && value === queryBuilderProps.value.defaultSort) {
-                continue;
-            }
+        if (props.hasEnabledFilters) {
+            return true;
+        }
 
-            if (value !== undefined) {
+        if (Object.values(props.searchInputs ?? {}).some((input) => input.value !== null && input.value !== undefined)) {
+            return true;
+        }
+
+        if (props.columns && props.defaultVisibleToggleableColumns) {
+            const visibleKeys = Object.values(props.columns)
+                .filter((column) => !column.hidden)
+                .map((column) => column.key)
+                .sort();
+            const defaultKeys = [...props.defaultVisibleToggleableColumns].sort();
+
+            if (visibleKeys.length !== defaultKeys.length || visibleKeys.some((key, i) => key !== defaultKeys[i])) {
                 return true;
             }
         }

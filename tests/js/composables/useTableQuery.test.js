@@ -208,41 +208,73 @@ describe("useTableQuery", () => {
         });
     });
 
-    describe("canBeReset (parsing the query string)", () => {
-        it("is false on a clean URL", () => {
-            expect(setup().canBeReset.value).toBe(false);
+    describe("canBeReset (derived from the server props)", () => {
+        const cleanProps = {
+            page: 1,
+            cursor: null,
+            sort: null,
+            defaultSort: null,
+            hasEnabledFilters: false,
+            searchInputs: [{ key: "global", value: null }],
+            columns: [{ key: "a", hidden: false }, { key: "b", hidden: false }],
+            defaultVisibleToggleableColumns: ["a", "b"],
+        };
+
+        it("is false on a clean state", () => {
+            expect(setup({ props: cleanProps }).canBeReset.value).toBe(false);
         });
 
         it("is true when a search input is forced visible", () => {
-            expect(setup({ forced: ["name"] }).canBeReset.value).toBe(true);
+            expect(setup({ props: cleanProps, forced: ["name"] }).canBeReset.value).toBe(true);
         });
 
         it("is true for page > 1 and false for page 1", () => {
-            setUrl("?page=2");
-            expect(setup().canBeReset.value).toBe(true);
-            setUrl("?page=1");
-            expect(setup().canBeReset.value).toBe(false);
+            expect(setup({ props: { ...cleanProps, page: 2 } }).canBeReset.value).toBe(true);
+            expect(setup({ props: { ...cleanProps, page: 1 } }).canBeReset.value).toBe(false);
         });
 
-        it("is true for filter, columns, cursor or sort in the URL", () => {
-            for (const search of ["?filter[a]=1", "?columns[0]=a", "?cursor=x", "?sort=name"]) {
-                setUrl(search);
-                expect(setup().canBeReset.value, search).toBe(true);
+        it("is true for a filter, a search value, a cursor, hidden columns or a sort", () => {
+            const cases = {
+                filter: { hasEnabledFilters: true },
+                search: { searchInputs: [{ key: "name", value: "john" }] },
+                cursor: { cursor: "abc" },
+                columns: { columns: [{ key: "a", hidden: false }, { key: "b", hidden: true }] },
+                sort: { sort: "name" },
+            };
+            for (const [name, override] of Object.entries(cases)) {
+                expect(setup({ props: { ...cleanProps, ...override } }).canBeReset.value, name).toBe(true);
             }
         });
 
         it("ignores a sort equal to the default sort", () => {
-            setUrl("?sort=name");
-            expect(setup({ props: { defaultSort: "name" } }).canBeReset.value).toBe(false);
+            expect(setup({ props: { ...cleanProps, sort: "name", defaultSort: "name" } }).canBeReset.value).toBe(false);
+            expect(setup({ props: { ...cleanProps, sort: "-name", defaultSort: "name" } }).canBeReset.value).toBe(true);
         });
 
-        it("respects the table prefix and custom page name", () => {
-            setUrl("?sort=name");
-            expect(setup({ name: "users" }).canBeReset.value).toBe(false);
-            setUrl("?users_sort=name");
-            expect(setup({ name: "users" }).canBeReset.value).toBe(true);
-            setUrl("?usersPage=3");
-            expect(setup({ pageName: "usersPage" }).canBeReset.value).toBe(true);
+        it("works the same for named tables (the server sends the props of that table)", () => {
+            expect(setup({ name: "users", props: { ...cleanProps, sort: "name" } }).canBeReset.value).toBe(true);
+            expect(setup({ name: "users", props: cleanProps }).canBeReset.value).toBe(false);
+        });
+
+        it("does not read the URL", () => {
+            setUrl("?sort=name&page=3&filter[a]=1");
+            expect(setup({ props: cleanProps }).canBeReset.value).toBe(false);
+        });
+
+        it("follows the props through reset and later navigation", () => {
+            const { queryBuilderProps, canBeReset } = setup({ props: { ...cleanProps, hasEnabledFilters: true } });
+            expect(canBeReset.value).toBe(true);
+
+            // The reset visit completed: the server sends back the clean state.
+            queryBuilderProps.value = { ...queryBuilderProps.value, ...cleanProps };
+            expect(canBeReset.value).toBe(false);
+
+            // Navigating with new params brings the button back.
+            queryBuilderProps.value = { ...queryBuilderProps.value, sort: "name" };
+            expect(canBeReset.value).toBe(true);
+
+            queryBuilderProps.value = { ...queryBuilderProps.value, sort: null, page: 3 };
+            expect(canBeReset.value).toBe(true);
         });
     });
 });
