@@ -351,6 +351,22 @@ class InertiaTableTest extends TestCase
         $this->assertTrue($qb['hasEnabledFilters']);
     }
 
+    public function test_select_filter_array_value_from_query_string_does_not_throw(): void
+    {
+        $request = Request::create('/', 'GET', ['filter' => ['status' => ['active', 'inactive']]]);
+        $table   = new InertiaTable($request);
+
+        $table->selectFilter('status', ['active' => 'Active', 'inactive' => 'Inactive']);
+
+        $response = Inertia::render('Users/Index');
+        $table->applyTo($response);
+
+        $props = $this->getProps($response);
+        $qb    = $props['queryBuilderProps']['default'];
+
+        $this->assertNull($qb['filters'][0]->getValue());
+    }
+
     public function test_search_value_from_query_string(): void
     {
         $request = Request::create('/', 'GET', ['filter' => ['global' => 'john']]);

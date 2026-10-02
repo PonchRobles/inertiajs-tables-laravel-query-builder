@@ -380,6 +380,8 @@ $table->selectFilter(
 
 With `noFilterOption: true` (default) an empty option is prepended so the user can clear the filter. Allow the filter on the Query Builder, for example with `AllowedFilter::exact('language_code')`.
 
+The filter's `toArray()` also returns `ordered_options`: a list of `{ value, label }` objects (`value` is a string) in the same order as your PHP array, including the *no filter* option (value `''`) when enabled. The `options` object is unchanged for backward compatibility, but JavaScript reorders integer-like keys (e.g. `[3 => 'c', 1 => 'a']` becomes `1, 3`), so the built-in select and custom UIs use `ordered_options` when order matters. The filter `value` is always a string (integer keys arrive as `"3"`).
+
 ### Toggle (boolean) filters
 
 A toggle switch that sends `filter[<key>]=1` or `filter[<key>]=0`. Its value is `null` while unset.
@@ -469,7 +471,7 @@ $posts = QueryBuilder::for(Post::class)
     ->allowedFilters([MultiSelectFilter::getQueryBuilderFilter('category')]);
 ```
 
-The options are sent to the frontend exactly as you pass them (a key-value array), in that order. There is no separate ordering option. `noFilterOption` and `noFilterOptionLabel` are accepted for signature parity with `selectFilter` but do not change the data sent for a multi-select filter. Option values that contain the Query Builder delimiter (`,` by default) are rejoined by the filter so they match the literal value.
+The options are sent to the frontend as you pass them (a key-value array). The filter's `toArray()` also returns `ordered_options`: a list of `{ value, label }` objects (`value` is `string | number`) in the same order as your PHP array, so the explicit option order survives JSON. JavaScript reorders integer-like keys of `options` (e.g. `[3 => 'c', 1 => 'a']` becomes `1, 3`), so use `ordered_options` when order matters; `value` keeps the PHP key type (integer keys arrive as JSON numbers), and the built-in component renders from it. `noFilterOption` and `noFilterOptionLabel` are accepted for signature parity with `selectFilter` but do not change the data sent for a multi-select filter. Option values that contain the Query Builder delimiter (`,` by default) are rejoined by the filter so they match the literal value.
 
 ### Date range filters
 

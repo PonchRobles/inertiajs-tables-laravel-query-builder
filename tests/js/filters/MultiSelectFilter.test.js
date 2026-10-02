@@ -53,4 +53,50 @@ describe("MultiSelectFilter", () => {
         await wrapper.findAll("button")[1].trigger("click");
         expect(onFilterChange).toHaveBeenCalledWith("role", null);
     });
+
+    describe("with ordered_options", () => {
+        function makeOrdered(value = null) {
+            const onFilterChange = vi.fn();
+            const wrapper = mount(MultiSelectFilter, {
+                props: {
+                    filter: {
+                        key: "tags",
+                        value,
+                        // JSON.parse would reorder these integer-like keys to 1, 3
+                        options: { 1: "a", 3: "c" },
+                        ordered_options: [
+                            { value: 3, label: "c" },
+                            { value: 1, label: "a" },
+                        ],
+                    },
+                    onFilterChange,
+                },
+            });
+            return { wrapper, onFilterChange };
+        }
+
+        it("renders options in ordered_options order", () => {
+            const { wrapper } = makeOrdered();
+            expect(wrapper.findAll("label").map((l) => l.text())).toEqual(["c", "a"]);
+        });
+
+        it("falls back to options when ordered_options is missing", () => {
+            const { wrapper } = make();
+            expect(wrapper.findAll("label").map((l) => l.text())).toEqual(["Admin", "User", "Guest"]);
+        });
+
+        it("checks selected values and emits string values on toggle", async () => {
+            const { wrapper, onFilterChange } = makeOrdered(["1"]);
+            const boxes = wrapper.findAll("input[type=checkbox]");
+            expect(boxes.map((b) => b.element.checked)).toEqual([false, true]);
+            await boxes[0].setValue(true);
+            expect(onFilterChange).toHaveBeenCalledWith("tags", ["1", "3"]);
+        });
+
+        it("select all reports keys as strings in ordered_options order", async () => {
+            const { wrapper, onFilterChange } = makeOrdered();
+            await wrapper.findAll("button")[0].trigger("click");
+            expect(onFilterChange).toHaveBeenCalledWith("tags", ["3", "1"]);
+        });
+    });
 });
