@@ -7,7 +7,7 @@
 
 ## [Fork reason](https://github.com/protonemedia/inertiajs-tables-laravel-query-builder/issues/122)
 
-This package provides a *DataTables-like* experience for [Inertia.js](https://inertiajs.com/) with support for searching, filtering, sorting, toggling columns, and pagination. It generates URLs that can be consumed by Spatie's excellent [Laravel Query Builder](https://github.com/spatie/laravel-query-builder) package, with no additional logic needed. The components are styled with [Tailwind CSS 3.0](https://tailwindcss.com/), but it's fully customizable with slots. The data refresh logic is based on Inertia's [Ping CRM demo](https://github.com/inertiajs/pingcrm).
+This package provides a *DataTables-like* experience for [Inertia.js](https://inertiajs.com/) with support for searching, filtering, sorting, toggling columns, and pagination. It generates URLs that can be consumed by Spatie's excellent [Laravel Query Builder](https://github.com/spatie/laravel-query-builder) package, with no additional logic needed. The components are styled with [Tailwind CSS](https://tailwindcss.com/) (v3 and v4), but it's fully customizable with slots. The data refresh logic is based on Inertia's [Ping CRM demo](https://github.com/inertiajs/pingcrm).
 
 ![Inertia.js Table for Laravel Query Builder](https://user-images.githubusercontent.com/8403149/177773377-86c32d69-8f86-47e4-8063-ea227e480d10.mp4)
 
@@ -32,7 +32,7 @@ This package provides a *DataTables-like* experience for [Inertia.js](https://in
 * [Laravel 11, 12, or 13](https://laravel.com/)
 * [Inertia.js](https://inertiajs.com/) v1, v2, or v3
 * [Spatie Laravel Query Builder](https://github.com/spatie/laravel-query-builder) v6 or v7
-* [Tailwind CSS v3](https://tailwindcss.com/) + [Forms plugin](https://github.com/tailwindlabs/tailwindcss-forms)
+* [Tailwind CSS](https://tailwindcss.com/) v3 or v4 + [Forms plugin](https://github.com/tailwindlabs/tailwindcss-forms)
 * PHP 8.2 - 8.5
 
 ## Installation
@@ -383,6 +383,8 @@ npm install @ponchrobles_/inertiajs-tables-laravel-query-builder --save
 yarn add @ponchrobles_/inertiajs-tables-laravel-query-builder
 ```
 
+#### Tailwind CSS v3
+
 Add the repository path to the `content` array of your [Tailwind configuration file](https://tailwindcss.com/docs/content-configuration). This ensures that the styling also works on production builds.
 
 ```js
@@ -392,6 +394,24 @@ module.exports = {
   ]
 }
 ```
+
+#### Tailwind CSS v4
+
+Tailwind v4 has no `tailwind.config.js` `content` array: sources are declared in your CSS file. Tailwind v4 ignores `node_modules` by default, so point `@source` at the package, and load the forms plugin with `@plugin`. The paths are relative to the CSS file.
+
+```css
+@import "tailwindcss";
+
+@plugin "@tailwindcss/forms";
+
+@source "../../node_modules/@ponchrobles_/inertiajs-tables-laravel-query-builder";
+```
+
+Notes for v4:
+
+* No `@theme` configuration is needed: the components only use Tailwind's default palette (`gray`, `indigo`, `cyan`, `blue`, `green`, `red`). The `color` prop (`primary`, `dootix`) just selects between built-in class sets, it is not a theme color.
+* The components use classes that render the same in v3 and v4 (explicit border and ring colors, slash opacity such as `ring-black/5`, explicit shadows). If you override styles with the `ui` prop, use the v4 names when you are on v4 (for example `shadow-xs` instead of `shadow-sm`, `outline-hidden` instead of `outline-none`).
+* Using the Laravel `vendor` directory is not needed, only the npm package contains the classes.
 
 #### Table component
 

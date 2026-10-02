@@ -70,7 +70,7 @@ const perPageOptions = computed(() => {
 // Theme
 const fallbackTheme = {
     select: {
-        base: "block min-w-max shadow-sm text-sm rounded-md",
+        base: "block min-w-max shadow-[0_1px_2px_0_rgb(0_0_0/0.05)] text-sm rounded-md",
         color: {
             primary: "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
             dootix: "border-gray-300 focus:ring-cyan-500 focus:border-blue-500",

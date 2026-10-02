@@ -67,7 +67,7 @@ const props = defineProps({
 // Theme
 const fallbackTheme = {
     input: {
-        base: "block w-full pl-9 text-sm rounded-md shadow-sm",
+        base: "block w-full pl-9 placeholder:text-gray-400 text-sm rounded-md shadow-[0_1px_2px_0_rgb(0_0_0/0.05)]",
         color: {
             primary: "focus:ring-indigo-500 focus:border-indigo-500 border-gray-300",
             dootix: "focus:ring-cyan-500 focus:border-blue-500 border-gray-300",

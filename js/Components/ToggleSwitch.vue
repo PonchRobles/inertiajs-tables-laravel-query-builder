@@ -42,12 +42,12 @@ const props = defineProps({
 
 const fallbackTheme = {
     toggle: {
-        base: "ml-4 relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-blue-500",
+        base: "ml-4 relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500/50",
     },
     toggle_on: { base: "bg-green-500" },
     toggle_off: { base: "bg-gray-200" },
     toggle_dot: {
-        base: "inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition ease-in-out duration-200",
+        base: "inline-block h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_0_rgb(0_0_0/0.1),0_1px_2px_-1px_rgb(0_0_0/0.1)] ring-0 transition ease-in-out duration-200",
     },
     toggle_dot_on: { base: "translate-x-5" },
     toggle_dot_off: { base: "translate-x-0" },

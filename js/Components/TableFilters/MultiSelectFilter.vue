@@ -3,14 +3,14 @@
     <div class="flex justify-between text-xs text-gray-500 mb-1">
       <button
         type="button"
-        class="hover:text-gray-700"
+        class="cursor-pointer hover:text-gray-700"
         @click.prevent="selectAll"
       >
         {{ translations.select_all }}
       </button>
       <button
         type="button"
-        class="hover:text-gray-700"
+        class="cursor-pointer hover:text-gray-700"
         @click.prevent="clearSelection"
       >
         {{ translations.clear_selection }}
