@@ -21,6 +21,9 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
+# Claude Code local settings and agent worktrees
+.claude/
+
 # PHP
 build
 composer.lock
@@ -34,3 +37,8 @@ coverage
 
 # Package artifacts
 *.tgz
+
+# Workbench demo
+/workbench/database/database.sqlite
+/workbench/public/hot
+/workbench/public/build

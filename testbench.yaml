@@ -1,0 +1,22 @@
+providers:
+  - Inertia\ServiceProvider
+  - Workbench\App\Providers\WorkbenchServiceProvider
+
+migrations:
+  - workbench/database/migrations
+
+seeders:
+  - Workbench\Database\Seeders\DatabaseSeeder
+
+env:
+  APP_NAME: "Inertia Table Demo"
+
+workbench:
+  start: /
+  install: false
+  discovers:
+    web: true
+    views: true
+  sync:
+    - from: workbench/public/build
+      to: public/build

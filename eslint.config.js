@@ -8,6 +8,7 @@ export default [
             "no-unused-vars": "off",
             "vue/multi-word-component-names": "off",
             "vue/no-v-html": "off",
+            "vue/html-button-has-type": "error",
             "vue/require-default-prop": "off",
             "indent": ["error", 4],
             "quotes": ["error", "double"],

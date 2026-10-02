@@ -1,14 +1,27 @@
-import { computed } from "vue";
+import { computed, unref } from "vue";
+import { usePage } from "@inertiajs/vue3";
 import qs from "qs";
 
 export function useTableQuery(queryBuilderData, queryBuilderProps, tableName, pageName, forcedVisibleSearchInputs) {
+
+    // Inertia's page url is reactive and is updated after every visit (replace visits included),
+    // unlike `location.search`. It is also available on the server (SSR), where `location` is not.
+    // Inertia v1 exposes `url` as a computed ref, v2/v3 as a plain property of a reactive page: unref handles both.
+    const inertiaPage = usePage();
+    const currentSearch = computed(() => {
+        const url = unref(inertiaPage?.url);
+        if (typeof url !== "string") return "";
+        const queryStart = url.indexOf("?");
+        if (queryStart === -1) return "";
+        return url.slice(queryStart + 1).split("#")[0];
+    });
 
     const canBeReset = computed(() => {
         if (forcedVisibleSearchInputs.value.length > 0) {
             return true;
         }
 
-        const queryStringData = qs.parse(location.search.substring(1));
+        const queryStringData = qs.parse(currentSearch.value);
         const page = queryStringData[pageName.value];
 
         if (page > 1) {
@@ -142,7 +155,7 @@ export function useTableQuery(queryBuilderData, queryBuilderProps, tableName, pa
         const queryStringData = qs.parse(location.search.substring(1));
         const prefix = tableName.value === "default" ? "" : (tableName.value + "_");
 
-        for (const key of ["filter", "columns", "cursor", "sort"]) {
+        for (const key of ["filter", "columns", "cursor", "sort", "perPage"]) {
             delete queryStringData[prefix + key];
         }
 
@@ -153,7 +166,7 @@ export function useTableQuery(queryBuilderData, queryBuilderProps, tableName, pa
             if (key === "page") {
                 queryStringData[pageName.value] = value;
             } else if (key === "perPage") {
-                queryStringData.perPage = value;
+                queryStringData[prefix + "perPage"] = value;
             } else {
                 queryStringData[prefix + key] = value;
             }

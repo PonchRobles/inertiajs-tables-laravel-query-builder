@@ -46,7 +46,16 @@ class ColumnTest extends TestCase
             'hidden'        => false,
             'sortable'      => true,
             'sorted'        => 'asc',
+            'nulls_last'    => false,
         ], $array);
+    }
+
+    public function test_column_nulls_last_is_serialized(): void
+    {
+        $column = new Column(key: 'name', label: 'Name', sortable: true, nullsLast: true);
+
+        $this->assertTrue($column->nullsLast);
+        $this->assertTrue($column->toArray()['nulls_last']);
     }
 
     public function test_column_defaults(): void
@@ -57,6 +66,7 @@ class ColumnTest extends TestCase
         $this->assertFalse($column->hidden);
         $this->assertFalse($column->sortable);
         $this->assertFalse($column->sorted);
+        $this->assertFalse($column->nullsLast);
     }
 
     public function test_column_to_array_reflects_hidden_and_desc_sort(): void

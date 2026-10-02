@@ -6,14 +6,14 @@
         class="hover:text-gray-700"
         @click.prevent="selectAll"
       >
-        {{ translations.select_all ?? 'Select all' }}
+        {{ translations.select_all }}
       </button>
       <button
         type="button"
         class="hover:text-gray-700"
         @click.prevent="clearSelection"
       >
-        {{ translations.clear_selection ?? 'Clear selection' }}
+        {{ translations.clear_selection }}
       </button>
     </div>
     <label

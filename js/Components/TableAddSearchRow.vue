@@ -32,6 +32,7 @@
         v-for="(searchInput, key) in searchInputs"
         :key="key"
         :dusk="`add-search-row-${searchInput.key}`"
+        type="button"
         :class="getTheme('menu_item')"
         role="menuitem"
         @click.prevent="enableSearch(searchInput.key)"

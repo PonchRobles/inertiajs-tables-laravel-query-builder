@@ -22,7 +22,12 @@
     "scripts": {
         "dev": "vite build --watch",
         "build": "vite build && cp js/index.d.ts dist/index.d.ts",
-        "lint": "eslint js/ --fix"
+        "lint": "eslint js/ tests/js/ workbench/resources/js/ --fix",
+        "typecheck": "tsc -p tsconfig.typecheck.json",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "demo:dev": "vite --config vite.workbench.config.js",
+        "demo:build": "vite build --config vite.workbench.config.js"
     },
     "peerDependencies": {
         "@inertiajs/vue3": "^1.0.16 || ^2.0.0 || ^3.0.0",
@@ -34,10 +39,18 @@
         "qs": "^6.16.0"
     },
     "devDependencies": {
+        "@tailwindcss/forms": "^0.5.11",
         "@vitejs/plugin-vue": "^6.0.9",
+        "@vue/test-utils": "^2.5.1",
+        "autoprefixer": "^10.6.1",
         "eslint": "^10.11.0",
         "eslint-plugin-vue": "^10.11.1",
+        "jsdom": "^30.1.1",
+        "laravel-vite-plugin": "^3.2.0",
+        "tailwindcss": "^3.4.19",
+        "typescript": "^7.0.2",
         "vite": "^8.3.1",
+        "vitest": "^5.0.2",
         "vue": "^3.5.43"
     },
     "repository": {

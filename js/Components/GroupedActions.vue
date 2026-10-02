@@ -27,6 +27,7 @@
         <button
           v-if="'searchFields' in actions && actions.searchFields.show"
           dusk="add-search-fields-button"
+          type="button"
           :class="getTheme('menu_item')"
           role="menuitem"
           @click="isSearchFieldsDisplayed = true"
@@ -43,11 +44,12 @@
               clip-rule="evenodd"
             />
           </svg>
-          <span>{{ translations.add_search_fields ?? 'Add search field' }}</span>
+          <span>{{ translations.add_search_fields }}</span>
         </button>
         <button
           v-if="'toggleColumns' in actions && actions.toggleColumns.show"
           dusk="toggle-column-button"
+          type="button"
           :class="getTheme('menu_item')"
           role="menuitem"
           @click="isToggleColumnsDisplayed = true"
@@ -65,12 +67,13 @@
               clip-rule="evenodd"
             />
           </svg>
-          <span>{{ translations.show_hide_columns ?? 'Show / Hide columns' }}</span>
+          <span>{{ translations.show_hide_columns }}</span>
         </button>
         <hr>
         <button
           v-if="'reset' in actions"
           dusk="reset-button"
+          type="button"
           :class="getTheme('reset_button')"
           role="menuitem"
           @click="actions.reset?.onClick"
@@ -87,7 +90,7 @@
               clip-rule="evenodd"
             />
           </svg>
-          <span>{{ translations.grouped_reset ?? 'Reset' }}</span>
+          <span>{{ translations.grouped_reset }}</span>
         </button>
       </div>
 
@@ -111,12 +114,13 @@
               stroke-linejoin="round"
             />
           </svg>
-          <span>{{ translations.add_search_fields ?? 'Add search field' }}</span>
+          <span>{{ translations.add_search_fields }}</span>
         </button>
         <button
           v-for="(searchInput, key) in actions.searchFields.searchInputs"
           :key="key"
           :dusk="`add-search-row-${searchInput.key}`"
+          type="button"
           :class="getTheme('search_item')"
           role="menuitem"
           @click.prevent="actions.searchFields.onClick(searchInput.key)"
@@ -145,7 +149,7 @@
               stroke-linejoin="round"
             />
           </svg>
-          <span>{{ translations.show_hide_columns ?? 'Show / Hide columns' }}</span>
+          <span>{{ translations.show_hide_columns }}</span>
         </button>
         <div class="px-2">
           <ul class="divide-y divide-gray-200">

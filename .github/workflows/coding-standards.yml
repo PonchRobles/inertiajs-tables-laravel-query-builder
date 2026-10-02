@@ -73,6 +73,12 @@ jobs:
       - name: "Run eslint"
         run: "npm run lint"
 
+      - name: "Run vitest"
+        run: "npm test"
+
+      - name: "Type-check the TypeScript typings"
+        run: "npm run typecheck"
+
       - name: "Run friendsofphp/php-cs-fixer"
         run: "composer php-cs-fixer"
 
