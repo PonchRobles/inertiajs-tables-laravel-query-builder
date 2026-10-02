@@ -54,6 +54,65 @@ class FilterTest extends TestCase
         $this->assertArrayNotHasKey('', $array['options']);
     }
 
+    public function test_select_filter_set_value_casts_scalars_to_string(): void
+    {
+        $filter = new Filter(key: 'status', label: 'Status', options: ['1' => 'One']);
+
+        $filter->setValue('active');
+        $this->assertSame('active', $filter->getValue());
+
+        $filter->setValue(1);
+        $this->assertSame('1', $filter->getValue());
+
+        $filter->setValue(1.5);
+        $this->assertSame('1.5', $filter->getValue());
+
+        $filter->setValue(true);
+        $this->assertSame('1', $filter->getValue());
+
+        $filter->setValue(false);
+        $this->assertSame('', $filter->getValue());
+    }
+
+    public function test_select_filter_set_value_ignores_non_scalar_values(): void
+    {
+        $filter = new Filter(key: 'status', label: 'Status', options: ['a' => 'A'], value: 'a');
+
+        $filter->setValue(['a', 'b']);
+        $this->assertNull($filter->getValue());
+
+        $filter->setValue('a');
+        $filter->setValue(new \stdClass());
+        $this->assertNull($filter->getValue());
+
+        $filter->setValue('a');
+        $filter->setValue(null);
+        $this->assertNull($filter->getValue());
+    }
+
+    public function test_select_filter_to_array_ordered_options_preserve_order(): void
+    {
+        $filter = new Filter(
+            key: 'n',
+            label: 'N',
+            options: [3 => 'c', 1 => 'a'],
+            noFilterOptionLabel: 'All',
+        );
+
+        $this->assertSame([
+            ['value' => '', 'label' => 'All'],
+            ['value' => '3', 'label' => 'c'],
+            ['value' => '1', 'label' => 'a'],
+        ], $filter->toArray()['ordered_options']);
+
+        $filter = new Filter(key: 'n', label: 'N', options: [3 => 'c', 1 => 'a'], noFilterOption: false);
+
+        $this->assertSame([
+            ['value' => '3', 'label' => 'c'],
+            ['value' => '1', 'label' => 'a'],
+        ], $filter->toArray()['ordered_options']);
+    }
+
     public function test_toggle_filter(): void
     {
         $filter = new ToggleFilter(key: 'is_admin', label: 'Admin Only');
@@ -204,5 +263,22 @@ class FilterTest extends TestCase
 
         $filter->setValue('a');
         $this->assertEquals(['a'], $filter->getValue());
+    }
+
+    public function test_multi_select_filter_to_array_keeps_php_order_in_ordered_options(): void
+    {
+        $filter = new MultiSelectFilter(
+            key: 'tags',
+            label: 'Tags',
+            options: [3 => 'c', 1 => 'a'],
+        );
+
+        $array = $filter->toArray();
+
+        $this->assertSame([3 => 'c', 1 => 'a'], $array['options']);
+        $this->assertSame([
+            ['value' => 3, 'label' => 'c'],
+            ['value' => 1, 'label' => 'a'],
+        ], $array['ordered_options']);
     }
 }

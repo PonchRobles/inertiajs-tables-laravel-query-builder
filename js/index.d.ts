@@ -51,6 +51,8 @@ export interface SelectFilterData {
     label: string;
     type: "select";
     options: Record<string, string>;
+    /** Options as a list: keeps the PHP order (JS objects reorder integer-like keys). */
+    ordered_options?: Array<{ value: string; label: string }>;
     value: string | null;
 }
 
@@ -60,6 +62,8 @@ export interface MultiSelectFilterData {
     label: string;
     type: "multi_select";
     options: Record<string, string>;
+    /** Options as a list: keeps the PHP order (JS objects reorder integer-like keys). */
+    ordered_options?: Array<{ value: string | number; label: string }>;
     value: string[] | null;
 }
 
